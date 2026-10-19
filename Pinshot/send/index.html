@@ -381,7 +381,7 @@
     if (meta.type === 'rtc-hi') { if (fresh && !rtc.ready) rtcOffer(); return; }
     if (meta.type === 'rtc-answer') { if (fresh) rtcAnswer(meta.sdp); return; }
     // 오늘 중계 서버로 받을 수 있는 양을 넘었다 (같은 와이파이로 바로 보내는 것은 상관없다)
-    if (meta.type === 'limit') { if (fresh) fail('아이폰이 오늘 서버로 받을 수 있는 이미지 ' + (meta.max || '') + '장을 다 받았습니다. 아이폰과 같은 와이파이에 있으면 서버 없이 바로 보낼 수 있습니다.'); return; }
+    if (meta.type === 'limit') { if (fresh) fail('아이폰이 오늘 서버로 받을 수 있는 이미지 ' + (meta.max || '') + '장을 다 받았습니다. 아이폰에서 광고를 보면 더 받을 수 있고, 아이폰과 같은 와이파이에 있으면 서버 없이 바로 보낼 수 있습니다.'); return; }
     if (meta.type === 'got') addLog(kindSubject(session.kind) + ' ' + meta.count + '개를 가져갔습니다');
     if (meta.type === 'bye') {
       // 끝낸 쪽 대신 받은 쪽이 Firebase 에 남은 방을 지운다
