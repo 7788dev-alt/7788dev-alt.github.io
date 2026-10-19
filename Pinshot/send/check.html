@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pinshot 연결 점검</title>
+<style>
+  :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --ok: #1f8f3e; --bad: #d64545; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --ok: #4cd07a; --bad: #ff6b6b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; line-height: 1.55; padding: 32px 16px 48px; }
+  main { max-width: 560px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  h1 { font-size: 22px; margin: 0; }
+  p { margin: 0; color: var(--ink2); font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  td { padding: 9px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.r { text-align: right; white-space: nowrap; font-weight: 600; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .wait { color: var(--ink2); }
+  small { color: var(--ink2); }
+  pre { margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pinshot 연결 점검</h1>
+  <p>이 PC의 인터넷에서 PC에서 보내기에 쓸 수 있는 중계 서버 후보가 열리는지 확인합니다. 아무것도 보내지 않고, 열리는지만 봅니다.</p>
+  <table id="t"></table>
+  <p>아래 결과를 그대로 복사해 알려 주세요.</p>
+  <pre id="out">확인하는 중…</pre>
+</main>
+<script>
+(function () {
+  // 열리기만 하면 되므로 응답 내용은 읽지 않는다 (no-cors). 막혀 있으면 네트워크 오류가 난다.
+  var targets = [
+    ['ntfy.sh (지금 쓰는 중계)', 'https://ntfy.sh/v1/health'],
+    ['Google Apps Script', 'https://script.google.com/favicon.ico'],
+    ['Apps Script 응답 주소', 'https://script.googleusercontent.com/'],
+    ['Firebase 실시간 DB (firebaseio)', 'https://pinshot-check-0.firebaseio.com/.json'],
+    ['Firebase 실시간 DB (아시아)', 'https://pinshot-check-0-default-rtdb.asia-southeast1.firebasedatabase.app/.json'],
+    ['Firebase 저장소', 'https://firebasestorage.googleapis.com/'],
+    ['Google Firebase', 'https://firestore.googleapis.com/'],
+    ['Google Drive API', 'https://www.googleapis.com/discovery/v1/apis'],
+    ['GitHub API', 'https://api.github.com/'],
+    ['Cloudflare Workers', 'https://workers.cloudflare.com/'],
+    ['workers.dev 주소', 'https://pinshot-check.workers.dev/'],
+    ['Supabase', 'https://supabase.com/favicon.ico'],
+    ['Pusher', 'https://sockjs.pusher.com/'],
+    ['Ably', 'https://rest.ably.io/time']
+  ];
+  var t = document.getElementById('t'), results = [];
+  targets.forEach(function (x, i) {
+    var tr = t.insertRow(); tr.insertCell().innerHTML = '<span></span><br><small></small>';
+    tr.cells[0].firstChild.textContent = x[0]; tr.cells[0].lastChild.textContent = new URL(x[1]).host;
+    var r = tr.insertCell(); r.className = 'r wait'; r.textContent = '확인 중';
+    var done = false, started = Date.now();
+    var timer = setTimeout(function () { finish(false, '시간 초과'); }, 10000);
+    function finish(ok, why) {
+      if (done) return; done = true; clearTimeout(timer);
+      r.className = 'r ' + (ok ? 'ok' : 'bad'); r.textContent = ok ? '열림' : '막힘';
+      results[i] = (ok ? 'O ' : 'X ') + x[0] + (ok ? ' (' + (Date.now() - started) + 'ms)' : ' (' + why + ')');
+      if (results.filter(Boolean).length === targets.length) document.getElementById('out').textContent = results.join('\n') + '\n' + navigator.userAgent;
+    }
+    fetch(x[1], { mode: 'no-cors', cache: 'no-store' }).then(function () { finish(true); }, function () { finish(false, '연결 거부'); });
+  });
+})();
+</script>
+</body>
+</html>

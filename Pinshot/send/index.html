@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pinshot으로 보내기</title>
+<style>
+  :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --accent: #007aff; --ok: #34c759; --bad: #d64545; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --accent: #4c8dff; --bad: #ff6b6b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; line-height: 1.55; padding: 32px 16px 48px; }
+  main { max-width: 560px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  h1 { font-size: 22px; margin: 0; }
+  p { margin: 0; color: var(--ink2); font-size: 15px; }
+  .pair { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+  #qr { background: #fff; padding: 8px; border-radius: 8px; line-height: 0; }
+  .label { font-size: 13px; color: var(--ink2); }
+  .code { font-size: 34px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+  .status { font-size: 14px; color: var(--ink2); display: flex; align-items: center; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink2); flex: none; }
+  .dot.ok { background: var(--ok); }
+  .drop { border: 1.5px dashed var(--line); border-radius: 12px; padding: 22px 14px; text-align: center; font-size: 14px; color: var(--ink2); outline: none; cursor: text; }
+  .drop:focus, .drop.over { border-color: var(--accent); }
+  .drop img { max-width: 100%; max-height: 220px; border-radius: 8px; display: block; margin: 0 auto 8px; }
+  textarea { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 90px; resize: vertical; width: 100%; }
+  button { font: inherit; font-size: 15px; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.plain { background: transparent; color: var(--accent); padding: 10px 0; }
+  button.plain.stop { color: var(--bad); font-weight: 500; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .log { font-size: 13.5px; color: var(--ink2); display: flex; flex-direction: column; gap: 4px; }
+  .err { color: var(--bad); font-size: 14px; }
+  .queue { display: flex; flex-direction: column; gap: 8px; }
+  .qi { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+  .qi img { width: 72px; height: 54px; object-fit: cover; border-radius: 6px; flex: none; background: var(--bg); }
+  .qi .nm { flex: 1; min-width: 0; font-size: 14px; color: var(--ink2); align-self: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qi textarea { flex: 1; min-height: 64px; border: 0; padding: 2px; border-radius: 0; }
+  .qi textarea:focus { outline: none; }
+  .qi .rm { font: inherit; font-size: 17px; line-height: 1; width: 26px; height: 26px; padding: 0; border-radius: 50%; background: var(--line); color: var(--ink2); flex: none; }
+  .keep { display: flex; flex-direction: column; gap: 6px; }
+  .keep .label { font-weight: 600; }
+  .keep label { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; cursor: pointer; font-size: 14px; }
+  .keep label.on { border-color: var(--accent); }
+  .keep input { margin: 4px 0 0; accent-color: var(--accent); }
+  .keep b { display: block; font-size: 14.5px; }
+  .keep small { display: block; color: var(--ink2); font-size: 12.5px; line-height: 1.45; }
+  .keepnote { font-size: 13.5px; color: var(--ink2); background: var(--bg); border-radius: 8px; padding: 8px 12px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Pinshot으로 보내기</h1>
+
+  <section id="wait">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <p>아이폰 카메라로 QR을 비추거나, Pinshot의 + &gt; <b>PC에서 받기</b>에 아래 코드를 입력하세요.</p>
+      <div class="pair">
+        <div id="qr" aria-label="연결 QR"></div>
+        <div>
+          <div class="label">연결 코드</div>
+          <div class="code" id="code">…</div>
+          <div class="label">QR을 찍으면 아래 고른 대로 유지됩니다</div>
+        </div>
+      </div>
+      <div class="keep" id="keep">
+        <div class="label">연결 유지</div>
+        <label data-k="1h"><input type="radio" name="keep" value="1h" checked><span><b>1시간</b><small>1시간 동안 주고받은 게 없으면 끝납니다. 이 PC에는 아무것도 남지 않습니다.</small></span></label>
+        <label data-k="day"><input type="radio" name="keep" value="day"><span><b>오늘 하루</b><small>24시간 유지합니다. 창을 닫았다 열어도 QR 없이 이어집니다.</small></span></label>
+        <label data-k="trust"><input type="radio" name="keep" value="trust"><span><b>이 PC 신뢰</b><small>끊을 때까지 이어집니다. 내 PC에서만 고르세요. 이 브라우저에 연결이 저장됩니다.</small></span></label>
+      </div>
+      <div class="status"><span class="dot"></span><span>아이폰과 연결되기를 기다리는 중…</span></div>
+    </div>
+  </section>
+
+  <section id="conn" hidden>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="status"><span class="dot ok"></span><span>아이폰과 연결됐습니다</span></div>
+      <div class="keepnote" id="keepnote"></div>
+      <div class="drop" id="drop" tabindex="0">여기를 누르고 붙여넣기(Ctrl+V)하거나 이미지를 끌어다 놓으세요. 여러 장이면 아래에 하나씩 쌓입니다.</div>
+      <div class="queue" id="queue"></div>
+      <div><button class="plain" id="addmemo" type="button">+ 메모 칸 추가</button></div>
+      <div class="row">
+        <button class="plain" id="clear" type="button">모두 비우기</button>
+        <button id="send" type="button" disabled>보내기</button>
+      </div>
+      <div><button class="plain stop" id="stop" type="button">연결 끝내기</button></div>
+      <div class="err" id="err" hidden></div>
+      <div class="log" id="log"></div>
+    </div>
+  </section>
+
+  <section id="end" hidden>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <p id="endmsg">연결이 끝났습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.</p>
+      <div><button id="again" type="button">새로 연결</button></div>
+    </div>
+  </section>
+
+  <p class="label">보내는 내용은 이 페이지에서 암호화돼 중계 서버를 거쳐 갑니다. 서버에는 암호화된 채로만 남고, 아이폰이 받으면 지워집니다. <span id="relayname"></span></p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  // 앱(PinshotApp > PCReceive.swift)과 같은 규칙을 써야 한다.
+  // 중계 서버: Firebase 실시간 DB(기본, 회사 보안망에서도 열린다) → 안 되면 ntfy.sh(예비).
+  // 고른 쪽을 QR 에 r=f / r=n 으로 담아 아이폰도 같은 쪽을 쓰게 한다.
+  var FB = 'https://spartan-studio-323306-222b7-default-rtdb.asia-southeast1.firebasedatabase.app/';
+  var NTFY = 'https://ntfy.sh/';
+  var CHUNK = 512 * 1024;
+  var relay = null;
+  var ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var SALT = 'pinshot-recv-v1';
+  var IDLE_MS = 60 * 60 * 1000; // 앱(PCReceive.swift)의 keepFor 와 같게 둔다
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  // 연결 유지: 1h(기본, 아무것도 남기지 않음) / day(24시간) / trust(끊을 때까지). day · trust 는 이 브라우저에 연결을 저장한다.
+  var STORE = 'pinshotSendKeep';
+  var keep = '1h', keepUntil = 0;
+  var MAX_IMAGE = 12 * 1024 * 1024;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var seenKeys = {};
+  var session = null, stream = null, idleTimer = null, retryTimer = null, retryDelay = 3000, inbound = Promise.resolve(), lastId = 'all', lastActive = 0, sending = false;
+
+  function saved() { try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { return null; } }
+  function forget() { try { localStorage.removeItem(STORE); } catch (e) {} }
+  function remember(code) { try { localStorage.setItem(STORE, JSON.stringify({ code: code, relay: relay, keep: keep, until: keepUntil, device: session && session.device, kind: session && session.kind })); } catch (e) {} }
+  // 기기 종류 이름 (기록에 쓴다)
+  // 이 PC 가 어떤 컴퓨터 · 브라우저인지 (아이폰 받기 화면에 '어느 PC 와 연결됐는지' 보이려고).
+  // 바깥 서비스에 묻지 않고 브라우저가 스스로 아는 것만 보낸다 (IP · 위치는 보내지 않는다).
+  function pcLabel() {
+    var ua = navigator.userAgent || '';
+    var os = /Windows/i.test(ua) ? 'Windows' : /Mac OS X|Macintosh/i.test(ua) ? 'Mac' : /CrOS/i.test(ua) ? 'ChromeOS' : /Linux/i.test(ua) ? 'Linux' : 'PC';
+    var br = /Edg\//.test(ua) ? 'Edge' : /Whale\//.test(ua) ? 'Whale' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '브라우저';
+    return os + ' · ' + br;
+  }
+  function sendPcInfo(to) {
+    post({ type: 'pcinfo', label: pcLabel(), to: to }).catch(function () {});
+  }
+  function kindName(kind) { return kind === 'iPad' ? '아이패드' : '아이폰'; }
+  function kindSubject(kind) { return kind === 'iPad' ? '아이패드가' : '아이폰이'; }
+  function untilText() { var d = new Date(keepUntil), today = new Date().toDateString() === d.toDateString(); return (today ? '오늘 ' : '내일 ') + (d.getHours() < 12 ? '오전 ' : '오후 ') + ((d.getHours() % 12) || 12) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function drawKeep() {
+    Array.prototype.forEach.call(document.querySelectorAll('#keep label'), function (l) { var on = l.dataset.k === keep; l.classList.toggle('on', on); l.querySelector('input').checked = on; });
+    $('keepnote').textContent = keep === 'trust' ? '이 PC 신뢰 · 끊을 때까지 유지됩니다. 다음에 이 페이지를 열면 바로 이어집니다.'
+      : keep === 'day' ? '오늘 하루 · ' + untilText() + '까지 유지됩니다. 창을 닫았다 열어도 이어집니다.'
+      : '1시간 · 주고받은 게 없으면 1시간 뒤 끝납니다.';
+    $('stop').textContent = keep === '1h' ? '연결 끝내기' : '연결 끊기 (저장된 연결도 지움)';
+  }
+  function show(name) { ['wait', 'conn', 'end'].forEach(function (n) { $(n).hidden = n !== name; }); }
+  function b64(bytes) { var s = ''; for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
+  function unb64(str) { var s = atob(str), out = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) out[i] = s.charCodeAt(i); return out; }
+  function hex(bytes) { return Array.prototype.map.call(bytes, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+
+  function newCode() {
+    var r = crypto.getRandomValues(new Uint8Array(8)), c = '';
+    for (var i = 0; i < 8; i++) c += ALPHABET[r[i] % 32];
+    return c;
+  }
+
+  // 코드 → 64바이트 (앞 32: 암호 키, 다음 12: 중계 서버의 방 이름)
+  async function derive(code) {
+    var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveBits']);
+    var bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: new TextEncoder().encode(SALT), iterations: 100000 }, base, 512));
+    var key = await crypto.subtle.importKey('raw', bits.slice(0, 32), 'AES-GCM', false, ['encrypt', 'decrypt']);
+    return { key: key, topic: 'ps_' + hex(bits.slice(32, 44)) };
+  }
+
+  // AES-GCM: 앞 12바이트 iv + 암호문(+16바이트 tag). 앱의 AES.GCM.SealedBox(combined:) 와 같은 모양.
+  async function seal(bytes) {
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    var ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, session.key, bytes));
+    var out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12); return out;
+  }
+  async function open(bytes) {
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, session.key, bytes.slice(12)));
+  }
+  async function sealMeta(obj) { obj.v = 1; obj.from = 'pc'; obj.time = Date.now(); return b64(await seal(new TextEncoder().encode(JSON.stringify(obj)))); }
+
+  function withTimeout(promise, ms) {
+    return Promise.race([promise, new Promise(function (_, reject) { setTimeout(function () { reject(new Error('timeout')); }, ms); })]);
+  }
+
+  // 이 PC 에서 열리는 중계 서버를 고른다 (응답 내용은 보지 않고 열리는지만 본다)
+  async function pickRelay() {
+    try { await withTimeout(fetch(FB + '.json?shallow=true', { mode: 'no-cors', cache: 'no-store' }), 5000); return 'f'; } catch (e) {}
+    try { await withTimeout(fetch(NTFY + 'v1/health', { mode: 'no-cors', cache: 'no-store' }), 5000); return 'n'; } catch (e) {}
+    return 'f';
+  }
+
+  function fbUrl(path) { return FB + 'ps/' + session.topic + '/' + path + '.json'; }
+  async function fbSend(method, path, value) {
+    var res = await fetch(fbUrl(path), { method: method, body: JSON.stringify(value) });
+    if (!res.ok) throw new Error('보내지 못했습니다 (' + res.status + ')');
+    return res;
+  }
+
+  async function post(meta, bodyBytes) {
+    if (relay === 'f') {
+      var envelope = { m: await sealMeta(meta), t: { '.sv': 'timestamp' } };
+      if (bodyBytes) {
+        // 큰 것은 조각으로 나눠 먼저 올리고, 설명에 조각 수를 적는다
+        var all = b64(await seal(bodyBytes)), id = hex(crypto.getRandomValues(new Uint8Array(8))), n = Math.ceil(all.length / CHUNK);
+        for (var i = 0; i < n; i++) await fbSend('PUT', 'f/' + id + '/' + i, all.slice(i * CHUNK, (i + 1) * CHUNK));
+        envelope.f = id; envelope.n = n;
+      }
+      await fbSend('POST', 'm', envelope);
+      return;
+    }
+    // ntfy: 본문이 짧으면 글로, 길거나 이미지면 첨부 파일로 보낸다.
+    // 헤더를 붙이지 않는 단순한 POST 라 브라우저의 사전 확인 요청이 생기지 않는다.
+    var url = NTFY + session.topic;
+    var init = { method: 'POST' };
+    if (bodyBytes) {
+      url += '?filename=p.bin&message=' + encodeURIComponent(await sealMeta(meta));
+      init.body = new Blob([await seal(bodyBytes)]);
+    } else {
+      init.body = await sealMeta(meta);
+    }
+    var res = await fetch(url, init);
+    if (!res.ok) throw new Error('보내지 못했습니다 (' + res.status + ')');
+  }
+
+  async function start() {
+    stop();
+    // 하루 · 신뢰로 저장해 둔 연결이 있으면 QR 없이 이어 간다
+    var s0 = saved();
+    if (s0 && s0.code && (s0.keep === 'trust' || (s0.keep === 'day' && Date.now() < s0.until))) {
+      keep = s0.keep; keepUntil = s0.until || 0; relay = s0.relay || 'f';
+      $('relayname').textContent = '(중계: ' + (relay === 'f' ? 'Firebase' : 'ntfy.sh') + ')';
+      session = await derive(s0.code);
+      session.code = s0.code;
+      session.connected = true;
+      session.device = s0.device; session.kind = s0.kind;
+      // 다시 이어 갈 때도 IP · 위치를 다시 알린다 (PC 가 다른 곳으로 옮겨졌을 수 있다)
+      setTimeout(function () { sendPcInfo(s0.device); }, 1500);
+      seenKeys = {}; lastId = 'all'; lastActive = Date.now();
+      drawKeep(); show('conn');
+      listen();
+      idleTimer = setInterval(checkIdle, 30000);
+      return;
+    }
+    forget();
+    keep = (document.querySelector('#keep input:checked') || {}).value || '1h'; keepUntil = 0; drawKeep();
+    var code = newCode();
+    $('code').textContent = code.slice(0, 4) + '-' + code.slice(4);
+    $('qr').textContent = '';
+    show('wait');
+    // 열리는 중계 서버를 고른 뒤에 QR 을 그린다 (QR 에 중계 서버를 함께 담는다)
+    relay = await pickRelay();
+    $('relayname').textContent = '(중계: ' + (relay === 'f' ? 'Firebase' : 'ntfy.sh') + ')';
+    if (window.QRCode) new QRCode($('qr'), { text: 'pinshot://recv?c=' + code + '&r=' + relay, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
+    else $('qr').textContent = 'QR을 불러오지 못했습니다. 코드를 입력하세요.';
+    session = await derive(code);
+    session.code = code;
+    session.connected = false;
+    seenKeys = {};
+    lastId = 'all';
+    lastActive = Date.now();
+    listen();
+    idleTimer = setInterval(checkIdle, 30000);
+  }
+
+  // 이 PC 에서 연결을 끝낸다. 연결된 아이폰에도 끝났다고 알린다.
+  async function end(message) {
+    if (session && session.connected) { try { await post({ type: 'bye' }); } catch (e) {} }
+    finish(message);
+  }
+
+  function stop() {
+    if (stream) stream.close();
+    stream = null;
+    if (idleTimer) clearInterval(idleTimer);
+    idleTimer = null;
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+
+  function finish(message) {
+    stop();
+    forget();
+    session = null;
+    queue.forEach(function (q) { if (q.url) URL.revokeObjectURL(q.url); });
+    $('log').innerHTML = ''; resetQueue();
+    $('endmsg').textContent = message;
+    show('end');
+  }
+
+  function checkIdle() {
+    if (!session) return;
+    if (keep === 'day' && session.connected && Date.now() > keepUntil) end('하루가 지나 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다.');
+    else if (keep === '1h' && Date.now() - lastActive > IDLE_MS) end('1시간 동안 주고받은 것이 없어 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다.');
+  }
+
+  // 중계 서버와 연결 하나를 열어 두고, 새 메시지가 오면 서버가 밀어 준다.
+  // (몇 초마다 묻는 방식은 서버의 요청 횟수 제한(처음 60번, 그 뒤 5초에 1번)에 금방 걸린다)
+  function listen() {
+    if (!session) return;
+    var mine = session;
+    if (relay === 'f') {
+      // 처음에 쌓인 것을 한꺼번에(path "/"), 그 뒤로는 하나씩(path "/키") 보내 준다
+      stream = new EventSource(fbUrl('m'));
+      stream.onopen = function () { retryDelay = 3000; };
+      var onData = function (e) {
+        var d; try { d = JSON.parse(e.data); } catch (err) { return; }
+        if (!d || d.data == null) return;
+        var entries = [];
+        if (d.path === '/') Object.keys(d.data).forEach(function (k) { entries.push([k, d.data[k]]); });
+        else if (d.path.split('/').length === 2) entries.push([d.path.slice(1), d.data]);
+        entries.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; }).forEach(function (x) {
+          if (seenKeys[x[0]] || !x[1] || !x[1].m) return;
+          seenKeys[x[0]] = 1;
+          inbound = inbound.then(function () { return handle(mine, { message: x[1].m }); });
+        });
+      };
+      stream.addEventListener('put', onData);
+      stream.addEventListener('patch', onData);
+    } else {
+      stream = new EventSource(NTFY + session.topic + '/sse?since=' + encodeURIComponent(lastId));
+      stream.onopen = function () { retryDelay = 3000; };
+      stream.onmessage = function (e) {
+        var m; try { m = JSON.parse(e.data); } catch (err) { return; }
+        if (m.event !== 'message') return;
+        lastId = m.id;
+        // 복호화가 비동기라 도착한 순서대로 처리한다
+        inbound = inbound.then(function () { return handle(mine, m); });
+      };
+    }
+    // 끊기면 직접 다시 연다 (마지막으로 받은 것 다음부터). 실패가 이어지면 조금씩 늦춘다.
+    stream.onerror = function () {
+      if (stream) stream.close();
+      stream = null;
+      if (session !== mine) return;
+      retryTimer = setTimeout(function () { retryTimer = null; if (session === mine) listen(); }, retryDelay);
+      retryDelay = Math.min(retryDelay * 2, 30000);
+    };
+  }
+
+  async function handle(mine, m) {
+    if (session !== mine) return;
+    var meta; try { meta = JSON.parse(new TextDecoder().decode(await open(unb64(m.message)))); } catch (e) { return; }
+    if (meta.from !== 'phone' || session !== mine) return;
+    lastActive = Date.now();
+    // 한 번에 한 기기만 연결한다: 이미 연결된 기기가 아닌 곳에서 온 것은 받지 않는다
+    // (기기 번호가 없는 예전 앱은 그대로 받아 준다)
+    var other = meta.device && session.device && meta.device !== session.device;
+    if (meta.type === 'hello') {
+      if (!session.connected || !session.device) {
+        var first = !session.connected;
+        session.connected = true;
+        session.device = meta.device; session.kind = meta.kind;
+        if (first) {
+          // 고른 유지 방식을 기기에 알리고, 하루 · 신뢰면 이 브라우저에 연결을 저장한다
+          keep = (document.querySelector('#keep input:checked') || {}).value || '1h';
+          keepUntil = keep === 'day' ? Date.now() + DAY_MS : 0;
+          post({ type: 'keep', keep: keep, until: keepUntil || undefined, to: meta.device }).catch(function () {});
+          sendPcInfo(meta.device);
+          drawKeep(); show('conn'); $('drop').focus();
+        }
+        if (keep !== '1h') remember(session.code);
+      } else if (other) {
+        // 다른 기기가 같은 코드로 들어오려 함 → 그 기기에 알리고 막는다 (방금 온 것만 기록에 남긴다)
+        post({ type: 'busy', to: meta.device, kind: session.kind }).catch(function () {});
+        if (Date.now() - (meta.time || 0) < 120000) addLog('다른 ' + kindSubject(meta.kind) + ' 연결하려 해서 막았습니다 (한 번에 한 기기만)');
+      }
+      return;
+    }
+    if (other) return;
+    if (meta.type === 'got') addLog(kindSubject(session.kind) + ' ' + meta.count + '개를 가져갔습니다');
+    if (meta.type === 'bye') {
+      // 끝낸 쪽 대신 받은 쪽이 Firebase 에 남은 방을 지운다
+      if (relay === 'f') fetch(FB + 'ps/' + session.topic + '.json', { method: 'DELETE' }).catch(function () {});
+      finish('아이폰에서 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.');
+    }
+  }
+
+  function addLog(text) {
+    var d = new Date(), t = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    $('log').insertAdjacentHTML('afterbegin', '<span></span>');
+    $('log').firstChild.textContent = t + '  ' + text;
+  }
+  // 보낼 것: 이미지와 메모 칸을 여러 개 쌓아 두고 한꺼번에 보낸다
+  var queue = [], qseq = 0;
+  function emptyMemo() { return { id: ++qseq, kind: 'text', text: '' }; }
+  function ready() { return queue.filter(function (q) { return q.kind === 'img' || q.text.trim(); }); }
+  function sync() {
+    var n = ready().length;
+    $('send').disabled = sending || !n;
+    $('send').textContent = sending ? '보내는 중…' : (n > 1 ? n + '개 보내기' : '보내기');
+  }
+  function fail(msg) { $('err').textContent = msg; $('err').hidden = !msg; }
+  function resetQueue() { queue = [emptyMemo()]; draw(); sync(); }
+
+  function draw() {
+    var box = $('queue');
+    box.innerHTML = '';
+    queue.forEach(function (q) {
+      var row = document.createElement('div'); row.className = 'qi';
+      if (q.kind === 'img') {
+        var img = document.createElement('img'); img.alt = ''; img.src = q.url; row.appendChild(img);
+        var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = q.name; row.appendChild(nm);
+      } else {
+        var ta = document.createElement('textarea'); ta.placeholder = '보낼 글을 적으세요'; ta.value = q.text;
+        ta.addEventListener('input', function () { q.text = ta.value; sync(); });
+        ta.addEventListener('paste', onPaste);
+        row.appendChild(ta);
+      }
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.setAttribute('aria-label', '빼기');
+      rm.addEventListener('click', function () {
+        if (q.url) URL.revokeObjectURL(q.url);
+        queue = queue.filter(function (x) { return x !== q; });
+        if (!queue.some(function (x) { return x.kind === 'text'; })) queue.push(emptyMemo());
+        draw(); sync();
+      });
+      row.appendChild(rm);
+      box.appendChild(row);
+    });
+  }
+
+  function takeImage(file) {
+    if (!file || !/^image\//.test(file.type)) return;
+    if (file.size > MAX_IMAGE) { fail('이미지가 너무 큽니다 (12MB까지).'); return; }
+    fail('');
+    file.arrayBuffer().then(function (buf) {
+      var item = { id: ++qseq, kind: 'img', bytes: new Uint8Array(buf), url: URL.createObjectURL(file), name: file.name && file.name !== 'image.png' ? file.name : '붙여넣은 이미지' };
+      // 비어 있는 메모 칸보다 앞에 넣는다
+      var at = queue.findIndex(function (x) { return x.kind === 'text' && !x.text.trim(); });
+      if (at < 0) queue.push(item); else queue.splice(at, 0, item);
+      draw(); sync();
+    });
+  }
+  function onPaste(e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [], found = false;
+    for (var i = 0; i < items.length; i++) if (items[i].type.indexOf('image') === 0) { found = true; takeImage(items[i].getAsFile()); }
+    if (found) e.preventDefault();
+  }
+  $('drop').addEventListener('paste', onPaste);
+  document.addEventListener('paste', function (e) { if (!$('conn').hidden && e.target === document.body) onPaste(e); });
+  ['dragenter', 'dragover'].forEach(function (n) { $('drop').addEventListener(n, function (e) { e.preventDefault(); $('drop').classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (n) { $('drop').addEventListener(n, function (e) { e.preventDefault(); $('drop').classList.remove('over'); if (n === 'drop') Array.prototype.forEach.call(e.dataTransfer.files, takeImage); }); });
+  $('addmemo').addEventListener('click', function () {
+    queue.push(emptyMemo()); draw(); sync();
+    var boxes = $('queue').querySelectorAll('textarea'); if (boxes.length) boxes[boxes.length - 1].focus();
+  });
+  $('clear').addEventListener('click', function () { queue.forEach(function (q) { if (q.url) URL.revokeObjectURL(q.url); }); resetQueue(); fail(''); });
+  Array.prototype.forEach.call(document.querySelectorAll('#keep input'), function (r) { r.addEventListener('change', function () { keep = r.value; drawKeep(); }); });
+  resetQueue();
+  $('again').addEventListener('click', start);
+  $('stop').addEventListener('click', function () { end('연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.'); });
+
+  $('send').addEventListener('click', async function () {
+    if (!session) return;
+    var list = ready();
+    sending = true; sync(); fail('');
+    var sent = 0;
+    try {
+      // 하나씩 순서대로 보내고, 보낸 것은 목록에서 바로 뺀다 (중간에 실패하면 남은 것만 다시 보내면 된다)
+      for (var i = 0; i < list.length; i++) {
+        var q = list[i];
+        if (q.kind === 'img') {
+          await post({ type: 'image', name: q.name }, q.bytes);
+          if (q.url) URL.revokeObjectURL(q.url);
+        } else {
+          var text = q.text.trim(), bytes = new TextEncoder().encode(text);
+          if (bytes.length > 2000) await post({ type: 'text', att: true }, bytes);
+          else await post({ type: 'text', text: text });
+        }
+        queue = queue.filter(function (x) { return x !== q; });
+        sent++;
+        draw();
+      }
+      lastActive = Date.now();
+    } catch (e) {
+      fail((e && e.message) || '보내지 못했습니다. 인터넷 연결을 확인하세요.');
+    }
+    if (sent) addLog(sent + '개를 보냈습니다');
+    if (!queue.some(function (x) { return x.kind === 'text'; })) queue.push(emptyMemo());
+    sending = false; draw(); sync();
+  });
+
+  if (!window.crypto || !crypto.subtle) { $('code').textContent = '사용 불가'; fail('이 브라우저에서는 암호화를 쓸 수 없습니다.'); return; }
+  start();
+})();
+</script>
+</body>
+</html>
