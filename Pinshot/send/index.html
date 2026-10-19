@@ -46,7 +46,10 @@
   .keep b { display: block; font-size: 14.5px; }
   .keep small { display: block; color: var(--ink2); font-size: 12.5px; line-height: 1.45; }
   .keepnote { font-size: 13.5px; color: var(--ink2); background: var(--bg); border-radius: 8px; padding: 8px 12px; }
-  .direct { color: var(--ok); font-weight: 600; }
+  .route { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink2); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; line-height: 1.45; }
+  .route b { font-weight: 600; }
+  .route.on { color: var(--ok); border-color: var(--ok); }
+  .route .ic { flex: none; width: 18px; height: 18px; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -77,7 +80,8 @@
 
   <section id="conn" hidden>
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="status"><span class="dot ok"></span><span>아이폰과 연결됐습니다</span><span id="direct" class="direct" hidden>· 같은 와이파이 · 서버 없이 바로</span></div>
+      <div class="status"><span class="dot ok"></span><span>아이폰과 연결됐습니다</span></div>
+      <div class="route" id="route" role="status" aria-live="polite"></div>
       <div class="keepnote" id="keepnote"></div>
       <div class="drop" id="drop" tabindex="0">여기를 누르고 붙여넣기(Ctrl+V)하거나 이미지를 끌어다 놓으세요. 여러 장이면 아래에 하나씩 쌓입니다.</div>
       <div class="queue" id="queue"></div>
@@ -244,7 +248,7 @@
       // 아이폰 앱이 열려 있으면 바로 연결을 시도한다
       setTimeout(function () { rtcOffer(); }, 2500);
       seenKeys = {}; lastId = 'all'; lastActive = Date.now();
-      drawKeep(); show('conn');
+      drawKeep(); show('conn'); drawDirect();
       listen();
       idleTimer = setInterval(checkIdle, 30000);
       return;
@@ -365,7 +369,7 @@
           keepUntil = keep === 'day' ? Date.now() + DAY_MS : 0;
           post({ type: 'keep', keep: keep, until: keepUntil || undefined, to: meta.device }).catch(function () {});
           sendPcInfo(meta.device);
-          drawKeep(); show('conn'); $('drop').focus();
+          drawKeep(); show('conn'); drawDirect(); $('drop').focus();
         }
         if (keep !== '1h') remember(session.code);
       } else if (other) {
@@ -395,7 +399,17 @@
   // 신호(offer/answer)는 지금 쓰는 암호화한 방으로 주고받는다. 바로 연결된 통로는 WebRTC 자체 암호화(DTLS)를 쓴다.
   // 앱 쪽: App/DirectLink.html (보이지 않는 웹 화면) + App/DirectLink.swift
   var rtc = { pc: null, dc: null, ready: false, waiters: {} };
-  function drawDirect() { $('direct').hidden = !rtc.ready; }
+  // 지금 보내는 길을 늘 보여 준다: 바로(같은 와이파이) · 바로 연결 시도 중 · 서버 거침
+  var WIFI = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>';
+  var CLOUD = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 10a4 4 0 0 1 0 8z"/></svg>';
+  function drawDirect() {
+    var el = $('route');
+    if (!el) return;
+    el.classList.toggle('on', !!rtc.ready);
+    if (rtc.ready) el.innerHTML = WIFI + '<span><b>같은 와이파이 · 서버 없이 바로</b> 보냅니다. 이미지가 인터넷 서버를 거치지 않습니다.</span>';
+    else if (rtc.pc) el.innerHTML = WIFI + '<span>같은 와이파이인지 확인하는 중… (안 되면 서버를 거쳐 보냅니다)</span>';
+    else el.innerHTML = CLOUD + '<span><b>서버를 거쳐</b> 보냅니다 (암호화). 아이폰과 PC가 같은 와이파이에 있으면 자동으로 바로 연결됩니다.</span>';
+  }
   function rtcClose() {
     try { if (rtc.dc) rtc.dc.close(); } catch (e) {}
     try { if (rtc.pc) rtc.pc.close(); } catch (e) {}
@@ -418,6 +432,7 @@
     var dc = pc.createDataChannel('pinshot', { ordered: true });
     dc.binaryType = 'arraybuffer';
     rtc.pc = pc; rtc.dc = dc;
+    drawDirect();
     dc.onopen = function () { if (rtc.dc !== dc) return; rtc.ready = true; drawDirect(); addLog('같은 와이파이로 바로 연결됐습니다 (서버를 거치지 않음)'); };
     dc.onclose = function () { if (rtc.dc !== dc) return; rtc.ready = false; drawDirect(); };
     dc.onmessage = function (e) {
