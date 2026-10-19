@@ -46,6 +46,7 @@
   .keep b { display: block; font-size: 14.5px; }
   .keep small { display: block; color: var(--ink2); font-size: 12.5px; line-height: 1.45; }
   .keepnote { font-size: 13.5px; color: var(--ink2); background: var(--bg); border-radius: 8px; padding: 8px 12px; }
+  .direct { color: var(--ok); font-weight: 600; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -76,7 +77,7 @@
 
   <section id="conn" hidden>
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="status"><span class="dot ok"></span><span>아이폰과 연결됐습니다</span></div>
+      <div class="status"><span class="dot ok"></span><span>아이폰과 연결됐습니다</span><span id="direct" class="direct" hidden>· 같은 와이파이 · 서버 없이 바로</span></div>
       <div class="keepnote" id="keepnote"></div>
       <div class="drop" id="drop" tabindex="0">여기를 누르고 붙여넣기(Ctrl+V)하거나 이미지를 끌어다 놓으세요. 여러 장이면 아래에 하나씩 쌓입니다.</div>
       <div class="queue" id="queue"></div>
@@ -98,7 +99,7 @@
     </div>
   </section>
 
-  <p class="label">보내는 내용은 이 페이지에서 암호화돼 중계 서버를 거쳐 갑니다. 서버에는 암호화된 채로만 남고, 아이폰이 받으면 지워집니다. <span id="relayname"></span></p>
+  <p class="label">아이폰과 같은 와이파이면 서버를 거치지 않고 바로 보냅니다. 아니면 이 페이지에서 암호화돼 중계 서버를 거쳐 가고, 서버에는 암호화된 채로만 남았다가 아이폰이 받으면 지워집니다. 이미지는 보내기 전에 줄여서 보냅니다 (가로 1600px). <span id="relayname"></span></p>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -118,7 +119,11 @@
   // 연결 유지: 1h(기본, 아무것도 남기지 않음) / day(24시간) / trust(끊을 때까지). day · trust 는 이 브라우저에 연결을 저장한다.
   var STORE = 'pinshotSendKeep';
   var keep = '1h', keepUntil = 0;
-  var MAX_IMAGE = 12 * 1024 * 1024;
+  // 고를 수 있는 원본 크기 / 줄인 뒤 보낼 수 있는 크기 (앱 PCReceive.swift 의 maxRelayChunks 와 맞춘다)
+  var MAX_IMAGE = 20 * 1024 * 1024;
+  var MAX_SEND = 5 * 1024 * 1024;
+  // 이미지는 보내기 전에 가로 1600px 로 줄인다 (앱도 저장할 때 1600px 로 줄인다). 화소가 너무 많으면 줄이지 않고 원본 그대로.
+  var MAX_W = 1600, MAX_AREA = 16000000;
 
   var $ = function (id) { return document.getElementById(id); };
   var seenKeys = {};
@@ -236,6 +241,8 @@
       session.device = s0.device; session.kind = s0.kind;
       // 다시 이어 갈 때도 IP · 위치를 다시 알린다 (PC 가 다른 곳으로 옮겨졌을 수 있다)
       setTimeout(function () { sendPcInfo(s0.device); }, 1500);
+      // 아이폰 앱이 열려 있으면 바로 연결을 시도한다
+      setTimeout(function () { rtcOffer(); }, 2500);
       seenKeys = {}; lastId = 'all'; lastActive = Date.now();
       drawKeep(); show('conn');
       listen();
@@ -280,6 +287,7 @@
 
   function finish(message) {
     stop();
+    rtcClose();
     forget();
     session = null;
     queue.forEach(function (q) { if (q.url) URL.revokeObjectURL(q.url); });
@@ -368,12 +376,94 @@
       return;
     }
     if (other) return;
+    var fresh = Date.now() - (meta.time || 0) < 60000;
+    // 아이폰 앱이 열려 바로 연결할 준비가 됨 → 제안을 보낸다 (오래된 것은 무시)
+    if (meta.type === 'rtc-hi') { if (fresh && !rtc.ready) rtcOffer(); return; }
+    if (meta.type === 'rtc-answer') { if (fresh) rtcAnswer(meta.sdp); return; }
+    // 오늘 중계 서버로 받을 수 있는 양을 넘었다 (같은 와이파이로 바로 보내는 것은 상관없다)
+    if (meta.type === 'limit') { if (fresh) fail('아이폰이 오늘 서버로 받을 수 있는 이미지 ' + (meta.max || '') + '장을 다 받았습니다. 아이폰과 같은 와이파이에 있으면 서버 없이 바로 보낼 수 있습니다.'); return; }
     if (meta.type === 'got') addLog(kindSubject(session.kind) + ' ' + meta.count + '개를 가져갔습니다');
     if (meta.type === 'bye') {
       // 끝낸 쪽 대신 받은 쪽이 Firebase 에 남은 방을 지운다
       if (relay === 'f') fetch(FB + 'ps/' + session.topic + '.json', { method: 'DELETE' }).catch(function () {});
       finish('아이폰에서 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.');
     }
+  }
+
+  // ── 같은 와이파이면 서버를 거치지 않고 바로 (WebRTC) ──
+  // STUN · TURN 서버를 쓰지 않아 같은 망에서 서로 닿을 때만 연결된다. 안 되면 지금처럼 중계 서버로 보낸다.
+  // 신호(offer/answer)는 지금 쓰는 암호화한 방으로 주고받는다. 바로 연결된 통로는 WebRTC 자체 암호화(DTLS)를 쓴다.
+  // 앱 쪽: App/DirectLink.html (보이지 않는 웹 화면) + App/DirectLink.swift
+  var rtc = { pc: null, dc: null, ready: false, waiters: {} };
+  function drawDirect() { $('direct').hidden = !rtc.ready; }
+  function rtcClose() {
+    try { if (rtc.dc) rtc.dc.close(); } catch (e) {}
+    try { if (rtc.pc) rtc.pc.close(); } catch (e) {}
+    Object.keys(rtc.waiters).forEach(function (k) { rtc.waiters[k](false); });
+    rtc = { pc: null, dc: null, ready: false, waiters: {} };
+    drawDirect();
+  }
+  function gatherDone(pc, ms) {
+    return new Promise(function (resolve) {
+      if (pc.iceGatheringState === 'complete') return resolve();
+      var timer = setTimeout(resolve, ms);
+      pc.addEventListener('icegatheringstatechange', function () { if (pc.iceGatheringState === 'complete') { clearTimeout(timer); resolve(); } });
+    });
+  }
+  async function rtcOffer() {
+    if (!window.RTCPeerConnection || !session || !session.connected) return;
+    rtcClose();
+    var mine = session;
+    var pc = new RTCPeerConnection({ iceServers: [] });
+    var dc = pc.createDataChannel('pinshot', { ordered: true });
+    dc.binaryType = 'arraybuffer';
+    rtc.pc = pc; rtc.dc = dc;
+    dc.onopen = function () { if (rtc.dc !== dc) return; rtc.ready = true; drawDirect(); addLog('같은 와이파이로 바로 연결됐습니다 (서버를 거치지 않음)'); };
+    dc.onclose = function () { if (rtc.dc !== dc) return; rtc.ready = false; drawDirect(); };
+    dc.onmessage = function (e) {
+      var m; try { m = JSON.parse(e.data); } catch (err) { return; }
+      if (m.k === 'ack' && rtc.waiters[m.id]) rtc.waiters[m.id](true);
+    };
+    pc.onconnectionstatechange = function () { if (rtc.pc === pc && (pc.connectionState === 'failed' || pc.connectionState === 'closed')) rtcClose(); };
+    try {
+      await pc.setLocalDescription(await pc.createOffer());
+      await gatherDone(pc, 2500);
+      if (rtc.pc !== pc || session !== mine) return;
+      await post({ type: 'rtc-offer', sdp: pc.localDescription.sdp, to: session.device });
+    } catch (e) { if (rtc.pc === pc) rtcClose(); return; }
+    // 10초 안에 답이 없으면 (앱이 닫혀 있거나 다른 망) 접고 중계 서버로 보낸다
+    setTimeout(function () { if (rtc.pc === pc && !rtc.ready) rtcClose(); }, 10000);
+  }
+  async function rtcAnswer(sdp) {
+    if (!rtc.pc || rtc.pc.remoteDescription || !sdp) return;
+    try { await rtc.pc.setRemoteDescription({ type: 'answer', sdp: sdp }); } catch (e) { rtcClose(); }
+  }
+  // 바로 보내기. 아이폰이 받았다고(ack) 하면 true, 통로가 없거나 못 받으면 false (그러면 중계 서버로 보낸다)
+  function rtcSend(id, meta, bytes) {
+    return new Promise(function (resolve) {
+      var dc = rtc.dc;
+      if (!rtc.ready || !dc || dc.readyState !== 'open') return resolve(false);
+      var done = false, timer = null;
+      var finish = function (ok) { if (done) return; done = true; clearTimeout(timer); delete rtc.waiters[id]; resolve(ok); };
+      timer = setTimeout(function () { finish(false); }, 15000 + (bytes ? bytes.length / 100 : 0));
+      rtc.waiters[id] = finish;
+      try {
+        dc.send(JSON.stringify({ k: 'item', id: id, type: meta.type, name: meta.name, text: meta.text, size: bytes ? bytes.length : 0, time: Date.now() }));
+        if (!bytes) { dc.send(JSON.stringify({ k: 'end', id: id })); return; }
+        var off = 0, CH = 16384;
+        dc.bufferedAmountLowThreshold = 256 * 1024;
+        var pump = function () {
+          while (off < bytes.length) {
+            if (dc.readyState !== 'open') return finish(false);
+            if (dc.bufferedAmount > 1024 * 1024) { dc.onbufferedamountlow = function () { dc.onbufferedamountlow = null; pump(); }; return; }
+            dc.send(bytes.subarray(off, Math.min(off + CH, bytes.length)));
+            off += CH;
+          }
+          dc.send(JSON.stringify({ k: 'end', id: id }));
+        };
+        pump();
+      } catch (e) { finish(false); }
+    });
   }
 
   function addLog(text) {
@@ -400,7 +490,7 @@
       var row = document.createElement('div'); row.className = 'qi';
       if (q.kind === 'img') {
         var img = document.createElement('img'); img.alt = ''; img.src = q.url; row.appendChild(img);
-        var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = q.name; row.appendChild(nm);
+        var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = q.label || q.name; row.appendChild(nm);
       } else {
         var ta = document.createElement('textarea'); ta.placeholder = '보낼 글을 적으세요'; ta.value = q.text;
         ta.addEventListener('input', function () { q.text = ta.value; sync(); });
@@ -419,12 +509,46 @@
     });
   }
 
+  function sizeText(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB'; }
+
+  // 이미지를 보내기 좋게 줄인다: 가로 1600px, WebP(안 되면 JPEG) 화질 0.9. 줄여도 작아지지 않으면 원본.
+  async function shrink(file) {
+    var original = new Uint8Array(await file.arrayBuffer());
+    if (!window.createImageBitmap || /gif|svg/.test(file.type)) return original;
+    var bmp;
+    try { bmp = await createImageBitmap(file); } catch (e) { return original; }
+    try {
+      var scale = Math.min(1, MAX_W / bmp.width);
+      var w = Math.max(1, Math.round(bmp.width * scale)), h = Math.max(1, Math.round(bmp.height * scale));
+      if (w * h > MAX_AREA) return original;
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(bmp, 0, 0, w, h);
+      var blob = await new Promise(function (r) { canvas.toBlob(r, 'image/webp', 0.9); });
+      if (!blob || blob.type !== 'image/webp') {
+        // WebP 를 못 만드는 브라우저: 투명한 곳은 흰색으로 채워 JPEG
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+        blob = await new Promise(function (r) { canvas.toBlob(r, 'image/jpeg', 0.9); });
+      }
+      if (!blob || (scale === 1 && blob.size >= original.length)) return original;
+      return new Uint8Array(await blob.arrayBuffer());
+    } catch (e) {
+      return original;
+    } finally {
+      if (bmp.close) bmp.close();
+    }
+  }
+
   function takeImage(file) {
     if (!file || !/^image\//.test(file.type)) return;
-    if (file.size > MAX_IMAGE) { fail('이미지가 너무 큽니다 (12MB까지).'); return; }
+    if (file.size > MAX_IMAGE) { fail('이미지가 너무 큽니다 (20MB까지).'); return; }
     fail('');
-    file.arrayBuffer().then(function (buf) {
-      var item = { id: ++qseq, kind: 'img', bytes: new Uint8Array(buf), url: URL.createObjectURL(file), name: file.name && file.name !== 'image.png' ? file.name : '붙여넣은 이미지' };
+    shrink(file).then(function (bytes) {
+      if (bytes.length > MAX_SEND) { fail('줄여도 ' + sizeText(bytes.length) + '라 보낼 수 없습니다 (5MB까지).'); return; }
+      var base = file.name && file.name !== 'image.png' ? file.name : '붙여넣은 이미지';
+      var item = { id: ++qseq, kind: 'img', bytes: bytes, url: URL.createObjectURL(file), name: base, label: base + ' · ' + sizeText(bytes.length) };
       // 비어 있는 메모 칸보다 앞에 넣는다
       var at = queue.findIndex(function (x) { return x.kind === 'text' && !x.text.trim(); });
       if (at < 0) queue.push(item); else queue.splice(at, 0, item);
@@ -454,18 +578,23 @@
     if (!session) return;
     var list = ready();
     sending = true; sync(); fail('');
-    var sent = 0;
+    var sent = 0, direct = 0;
     try {
       // 하나씩 순서대로 보내고, 보낸 것은 목록에서 바로 뺀다 (중간에 실패하면 남은 것만 다시 보내면 된다)
       for (var i = 0; i < list.length; i++) {
         var q = list[i];
+        // 같은 번호(rid)를 붙여, 바로 보낸 것이 늦게 닿아 중계로 한 번 더 가도 아이폰이 한 번만 받게 한다
+        var rid = hex(crypto.getRandomValues(new Uint8Array(6)));
         if (q.kind === 'img') {
-          await post({ type: 'image', name: q.name }, q.bytes);
+          if (await rtcSend(rid, { type: 'image', name: q.name }, q.bytes)) direct++;
+          else await post({ type: 'image', name: q.name, rid: rid }, q.bytes);
           if (q.url) URL.revokeObjectURL(q.url);
         } else {
           var text = q.text.trim(), bytes = new TextEncoder().encode(text);
-          if (bytes.length > 2000) await post({ type: 'text', att: true }, bytes);
-          else await post({ type: 'text', text: text });
+          // 긴 글도 한 메시지 크기 한도에 걸리지 않게 바이트 조각으로 보낸다
+          if (await rtcSend(rid, { type: 'text' }, bytes)) direct++;
+          else if (bytes.length > 2000) await post({ type: 'text', att: true, rid: rid }, bytes);
+          else await post({ type: 'text', text: text, rid: rid });
         }
         queue = queue.filter(function (x) { return x !== q; });
         sent++;
@@ -475,7 +604,7 @@
     } catch (e) {
       fail((e && e.message) || '보내지 못했습니다. 인터넷 연결을 확인하세요.');
     }
-    if (sent) addLog(sent + '개를 보냈습니다');
+    if (sent) addLog(sent + '개를 보냈습니다' + (direct ? (direct === sent ? ' (서버 없이 바로)' : ' (' + direct + '개는 서버 없이 바로)') : ''));
     if (!queue.some(function (x) { return x.kind === 'text'; })) queue.push(emptyMemo());
     sending = false; draw(); sync();
   });
