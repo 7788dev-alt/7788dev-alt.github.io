@@ -289,6 +289,7 @@
       seenKeys = {}; lastId = 'all'; lastActive = Date.now();
       drawKeep(); show('conn'); drawDirect();
       listen();
+      startBeat();
       idleTimer = setInterval(checkIdle, 30000);
       return;
     }
@@ -319,7 +320,31 @@
     finish(message);
   }
 
+  // PC 가 켜져 있다는 신호: 30초마다 ps/<방>/a 에 서버 시각을 적는다 (Firebase 만).
+  // 아이폰 앱은 3분 넘게 신호가 없으면 PC 가 잠자기 · 꺼짐으로 본다 (1시간 연결은 끝내고, 하루 · 신뢰는 "PC 꺼짐"으로 표시).
+  var beatTimer = null;
+  function beat() {
+    if (relay !== 'f' || !session || !session.connected) return;
+    fetch(fbUrl('a'), { method: 'PUT', body: JSON.stringify({ '.sv': 'timestamp' }) }).catch(function () {});
+  }
+  function startBeat() {
+    if (beatTimer) clearInterval(beatTimer);
+    beat();
+    beatTimer = setInterval(beat, 30000);
+  }
+  // 잠자기에서 깨어나거나 창으로 돌아오면 바로 신호를 보내고, 같은 와이파이 연결도 다시 시도한다
+  function wake() {
+    if (!session || !session.connected) return;
+    beat();
+    if (!rtc.ready && !rtc.pc) rtcOffer();
+  }
+  window.addEventListener('focus', wake);
+  window.addEventListener('online', wake);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) wake(); });
+
   function stop() {
+    if (beatTimer) clearInterval(beatTimer);
+    beatTimer = null;
     if (stream) stream.close();
     stream = null;
     if (idleTimer) clearInterval(idleTimer);
@@ -409,6 +434,7 @@
           post({ type: 'keep', keep: keep, until: keepUntil || undefined, to: meta.device }).catch(function () {});
           sendPcInfo(meta.device);
           drawKeep(); show('conn'); drawDirect(); $('drop').focus();
+          startBeat();
         }
         if (keep !== '1h') remember(session.code);
       } else if (other) {
