@@ -10,7 +10,9 @@
   h1 { font-size: 28px; margin: 0 0 8px; }
   h2 { font-size: 19px; margin: 36px 0 8px; }
   p, li { font-size: 16px; }
+  li { margin-bottom: 6px; }
   .lead { color: #5a6275; margin: 0; }
+  .nav { font-size: 14px; margin-bottom: 28px; }
   a { color: #007aff; }
   hr { border: 0; border-top: 1px solid #dfe3ea; margin: 40px 0 0; }
   @media (prefers-color-scheme: dark) { body { background: #111317; color: #eceff5; } .lead { color: #a9b2c3; } hr { border-color: #2c3442; } a { color: #6c9bff; } }
@@ -18,27 +20,32 @@
 </head>
 <body>
 <main>
+  <p class="nav"><a href="/">7788dev 앱</a></p>
   <h1>Pinshot</h1>
-  <p class="lead">화면의 일부를 캡쳐해 다른 앱 위에 띄워 두는 아이폰 앱입니다.</p>
+  <p class="lead">화면의 일부를 캡쳐해 다른 앱 위에 띄워 두는 아이폰 · 아이패드 앱입니다.</p>
 
   <h2>앱 소개</h2>
-  <p>Pinshot은 캡쳐한 이미지나 짧은 글을 화면 위에 작은 창으로 띄워, 다른 앱을 쓰면서도 계속 볼 수 있게 해 줍니다. 띄운 창은 옮기거나 화면 가장자리로 밀어 숨길 수 있습니다. 긴 캡쳐는 노트로 모아 두고 태그로 찾을 수 있습니다.</p>
-  <p>개인이 만들어 직접 쓰는 앱이며, 소스는 <a href="https://github.com/7788dev-alt/Pinshot">GitHub 저장소</a>에 공개돼 있습니다.</p>
+  <p>Pinshot은 캡쳐한 이미지나 짧은 글을 화면 위에 작은 창(화면 속 화면)으로 띄워, 다른 앱을 쓰면서도 계속 볼 수 있게 해 줍니다. 띄운 창은 옮기거나 화면 가장자리로 밀어 숨길 수 있습니다. 긴 캡쳐는 노트로 모아 두고 태그로 찾을 수 있으며, 이미지 속 글자 읽기와 번역도 기기 안에서 합니다.</p>
+  <p>PC 연결: PC 브라우저에서 <a href="/Pinshot/send/">보내기 페이지</a>를 열고 앱으로 QR을 찍으면, 로그인 없이 PC와 아이폰이 글 · 이미지를 주고받습니다.</p>
 
   <h2 id="privacy">개인정보처리방침</h2>
-  <p>시행일: 2026년 10월 12일</p>
+  <p>시행일: 2026년 11월 2일 (이전: 2026년 10월 12일)</p>
   <ul>
-    <li><strong>수집하는 정보가 없습니다.</strong> Pinshot은 서버를 운영하지 않으며, 사용자의 이미지, 글, 사용 기록을 개발자나 제3자에게 보내지 않습니다. 광고와 분석 도구도 쓰지 않습니다.</li>
-    <li><strong>데이터는 기기에 저장됩니다.</strong> 캡쳐, 메모, 노트, 태그는 사용자의 아이폰 안에만 저장됩니다.</li>
-    <li><strong>구글 드라이브 백업은 선택 기능입니다.</strong> 사용자가 직접 구글 계정을 연결하고 "드라이브에 올리기"를 눌렀을 때만, 백업 파일이 사용자 본인의 구글 드라이브 "Pinshot" 폴더에 올라갑니다.</li>
+    <li><strong>개발자는 사용자 정보를 모으지 않습니다.</strong> 개발자는 회원 가입이나 사용자 데이터를 보관하는 서버를 운영하지 않으며, 사용자의 파일, 글, 사용 기록을 개발자에게 보내지 않습니다.</li>
+    <li><strong>데이터는 기기에 저장됩니다.</strong> 캡쳐, 메모, 노트, 태그는 사용자의 기기 안에만 저장됩니다. 글자 읽기(OCR)와 번역은 Apple의 기기 내 기능으로 처리합니다.</li>
+    <li><strong>PC 연결은 선택 기능입니다.</strong> 사용자가 PC와 연결했을 때만, 주고받는 글 · 이미지가 기기에서 암호화(AES-GCM)된 뒤 전달됩니다. 같은 와이파이면 서버를 거치지 않고 직접 보내고, 아니면 Google Firebase 실시간 데이터베이스(또는 ntfy.sh) 중계를 거칩니다. 중계 서버에는 암호화된 내용만 잠시 머물고, 받은 쪽이 받으면 지웁니다. 열쇠는 QR 코드 안에만 있어 개발자나 중계 서버는 내용을 볼 수 없습니다.</li>
+    <li><strong>링크 캡쳐.</strong> 사용자가 공유한 링크의 웹 페이지를 캡쳐할 때, 그 페이지는 일반 브라우저처럼 해당 웹사이트에서 직접 불러옵니다.</li>
+    <li><strong>구글 드라이브 연결은 선택 기능입니다.</strong> 사용자가 설정에서 구글 계정을 연결했을 때만, 백업 파일이 사용자 본인의 구글 드라이브 "Pinshot" 폴더에 저장됩니다.</li>
     <li><strong>드라이브 접근 범위는 앱이 만든 파일로 한정됩니다.</strong> Pinshot은 "이 앱이 만든 파일만" 볼 수 있는 권한(drive.file)을 요청합니다. 드라이브의 다른 파일은 읽거나 바꿀 수 없습니다. 연결된 계정을 화면에 표시하기 위해 계정의 이메일 주소를 확인하며, 이 주소는 기기에만 저장됩니다.</li>
-    <li><strong>로그인 정보는 기기에만 있습니다.</strong> 구글 로그인은 구글의 로그인 화면에서 이뤄지며 앱은 비밀번호를 받지 않습니다. 다시 로그인하지 않게 해 주는 토큰은 아이폰의 키체인에 저장되고, 구글과 통신할 때만 쓰입니다.</li>
-    <li><strong>연결은 언제든 끊을 수 있습니다.</strong> 앱의 설정에서 "연결 끊기"를 누르면 기기의 토큰이 지워지고 구글에 권한 회수를 요청합니다. <a href="https://myaccount.google.com/permissions">구글 계정의 권한 페이지</a>에서도 직접 회수할 수 있습니다. 드라이브에 올려 둔 백업 파일은 사용자가 직접 지울 수 있습니다.</li>
-    <li><strong>Google API 서비스 사용자 데이터 정책을 따릅니다.</strong> Google API에서 받은 정보의 사용은 제한적 사용 요건을 포함한 Google API Services User Data Policy를 지킵니다.</li>
+    <li><strong>로그인 정보는 기기에만 있습니다.</strong> 구글 로그인은 구글의 로그인 화면에서 이뤄지며 앱은 비밀번호를 받지 않습니다. 다시 로그인하지 않게 해 주는 토큰은 기기의 키체인에 저장되고, 구글과 통신할 때만 쓰입니다.</li>
+    <li><strong>연결은 언제든 끊을 수 있습니다.</strong> 앱의 설정에서 연결을 끊으면 기기의 토큰이 지워지고 구글에 권한 회수를 요청합니다. <a href="https://myaccount.google.com/permissions">구글 계정의 권한 페이지</a>에서도 직접 회수할 수 있습니다. 드라이브에 저장된 파일은 사용자가 직접 지울 수 있습니다.</li>
+    <li><strong>Google API 서비스 사용자 데이터 정책을 따릅니다.</strong> Google API에서 받은 정보의 사용은 제한적 사용 요건을 포함한 <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>를 지킵니다. 받은 정보는 위 기능에만 쓰고, 다른 사람에게 넘기거나 광고에 쓰지 않습니다.</li>
+    <li><strong>광고 (Google AdMob).</strong> 앱 안 일부 화면에 Google AdMob 광고가 나옵니다. 광고를 보여 주고 성과를 재기 위해 Google이 기기 정보(기기 종류, OS 버전, IP 주소와 이를 통한 대략적인 위치), 앱별 식별자, 광고를 보거나 누른 기록을 수집할 수 있습니다. 앱은 추적 허용(App Tracking Transparency)을 요청하지 않으므로, 다른 회사의 앱·웹사이트와 묶어 추적하는 데 쓰이는 광고 식별자(IDFA)는 넘어가지 않습니다. Google이 정보를 쓰는 방식은 <a href="https://policies.google.com/technologies/partner-sites">Google 파트너 사이트 정책</a>과 <a href="https://policies.google.com/privacy">Google 개인정보처리방침</a>을 따릅니다.</li>
+    <li><strong>방침이 바뀌면</strong> 이 페이지에 시행일과 함께 알립니다.</li>
   </ul>
 
-  <h2>문의</h2>
-  <p><a href="mailto:7788dev@gmail.com">7788dev@gmail.com</a> 으로 보내 주세요.</p>
+  <h2 id="support">문의 · 지원</h2>
+  <p>사용 중 문제나 궁금한 점, 개인정보 관련 요청은 <a href="mailto:7788dev@gmail.com">7788dev@gmail.com</a> 으로 보내 주세요.</p>
   <hr>
 </main>
 </body>
