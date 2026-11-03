@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Pinshot 연결 점검</title>
+<title data-i18n="title">Pinshot 연결 점검</title>
 <style>
   :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --ok: #1f8f3e; --bad: #d64545; }
   @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --ok: #4cd07a; --bad: #ff6b6b; } }
@@ -23,27 +23,48 @@
 </head>
 <body>
 <main>
-  <h1>Pinshot 연결 점검</h1>
-  <p>이 PC의 인터넷에서 PC에서 보내기에 쓸 수 있는 중계 서버 후보가 열리는지 확인합니다. 아무것도 보내지 않고, 열리는지만 봅니다.</p>
+  <h1 data-i18n="title">Pinshot 연결 점검</h1>
+  <p data-i18n="intro">이 PC의 인터넷에서 PC에서 보내기에 쓸 수 있는 중계 서버 후보가 열리는지 확인합니다. 아무것도 보내지 않고, 열리는지만 봅니다.</p>
   <table id="t"></table>
-  <p>아래 결과를 그대로 복사해 알려 주세요.</p>
-  <pre id="out">확인하는 중…</pre>
+  <p data-i18n="copy">아래 결과를 그대로 복사해 알려 주세요.</p>
+  <pre id="out" data-i18n="checking">확인하는 중…</pre>
 </main>
 <script>
 (function () {
+  // 언어: 주소 ?lang= → 보내기 페이지에서 고른 것 → 브라우저 언어 → 영어 (index.html 과 같은 규칙)
+  var I18N = {
+    ko: { title: 'Pinshot 연결 점검', intro: '이 PC의 인터넷에서 PC에서 보내기에 쓸 수 있는 중계 서버 후보가 열리는지 확인합니다. 아무것도 보내지 않고, 열리는지만 봅니다.',
+          copy: '아래 결과를 그대로 복사해 알려 주세요.', checking: '확인하는 중…', inUse: 'ntfy.sh (지금 쓰는 중계)', asReply: 'Apps Script 응답 주소',
+          fbIo: 'Firebase 실시간 DB (firebaseio)', fbAsia: 'Firebase 실시간 DB (아시아)', fbStorage: 'Firebase 저장소', wdev: 'workers.dev 주소',
+          wait: '확인 중', open: '열림', blocked: '막힘', timeout: '시간 초과', refused: '연결 거부' },
+    en: { title: 'Pinshot Connection Check', intro: 'Checks whether this PC’s internet can reach the relay server candidates used for sending from PC. Nothing is sent; it only checks that they open.',
+          copy: 'Copy the result below as-is and send it to us.', checking: 'Checking…', inUse: 'ntfy.sh (relay in use)', asReply: 'Apps Script response host',
+          fbIo: 'Firebase Realtime DB (firebaseio)', fbAsia: 'Firebase Realtime DB (Asia)', fbStorage: 'Firebase Storage', wdev: 'workers.dev host',
+          wait: 'Checking', open: 'Open', blocked: 'Blocked', timeout: 'timed out', refused: 'connection refused' }
+  };
+  function pickLang() {
+    try { var q = new URLSearchParams(location.search).get('lang'); if (q && I18N[q.slice(0, 2)]) return q.slice(0, 2); } catch (e) {}
+    try { var s = localStorage.getItem('pinshotLang'); if (s && I18N[s]) return s; } catch (e) {}
+    var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < list.length; i++) { var c = String(list[i]).slice(0, 2).toLowerCase(); if (I18N[c]) return c; }
+    return 'en';
+  }
+  var L = I18N[pickLang()];
+  document.documentElement.lang = pickLang();
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { el.textContent = L[el.dataset.i18n]; });
   // 열리기만 하면 되므로 응답 내용은 읽지 않는다 (no-cors). 막혀 있으면 네트워크 오류가 난다.
   var targets = [
-    ['ntfy.sh (지금 쓰는 중계)', 'https://ntfy.sh/v1/health'],
+    [L.inUse, 'https://ntfy.sh/v1/health'],
     ['Google Apps Script', 'https://script.google.com/favicon.ico'],
-    ['Apps Script 응답 주소', 'https://script.googleusercontent.com/'],
-    ['Firebase 실시간 DB (firebaseio)', 'https://pinshot-check-0.firebaseio.com/.json'],
-    ['Firebase 실시간 DB (아시아)', 'https://pinshot-check-0-default-rtdb.asia-southeast1.firebasedatabase.app/.json'],
-    ['Firebase 저장소', 'https://firebasestorage.googleapis.com/'],
+    [L.asReply, 'https://script.googleusercontent.com/'],
+    [L.fbIo, 'https://pinshot-check-0.firebaseio.com/.json'],
+    [L.fbAsia, 'https://pinshot-check-0-default-rtdb.asia-southeast1.firebasedatabase.app/.json'],
+    [L.fbStorage, 'https://firebasestorage.googleapis.com/'],
     ['Google Firebase', 'https://firestore.googleapis.com/'],
     ['Google Drive API', 'https://www.googleapis.com/discovery/v1/apis'],
     ['GitHub API', 'https://api.github.com/'],
     ['Cloudflare Workers', 'https://workers.cloudflare.com/'],
-    ['workers.dev 주소', 'https://pinshot-check.workers.dev/'],
+    [L.wdev, 'https://pinshot-check.workers.dev/'],
     ['Supabase', 'https://supabase.com/favicon.ico'],
     ['Pusher', 'https://sockjs.pusher.com/'],
     ['Ably', 'https://rest.ably.io/time']
@@ -52,16 +73,16 @@
   targets.forEach(function (x, i) {
     var tr = t.insertRow(); tr.insertCell().innerHTML = '<span></span><br><small></small>';
     tr.cells[0].firstChild.textContent = x[0]; tr.cells[0].lastChild.textContent = new URL(x[1]).host;
-    var r = tr.insertCell(); r.className = 'r wait'; r.textContent = '확인 중';
+    var r = tr.insertCell(); r.className = 'r wait'; r.textContent = L.wait;
     var done = false, started = Date.now();
-    var timer = setTimeout(function () { finish(false, '시간 초과'); }, 10000);
+    var timer = setTimeout(function () { finish(false, L.timeout); }, 10000);
     function finish(ok, why) {
       if (done) return; done = true; clearTimeout(timer);
-      r.className = 'r ' + (ok ? 'ok' : 'bad'); r.textContent = ok ? '열림' : '막힘';
+      r.className = 'r ' + (ok ? 'ok' : 'bad'); r.textContent = ok ? L.open : L.blocked;
       results[i] = (ok ? 'O ' : 'X ') + x[0] + (ok ? ' (' + (Date.now() - started) + 'ms)' : ' (' + why + ')');
       if (results.filter(Boolean).length === targets.length) document.getElementById('out').textContent = results.join('\n') + '\n' + navigator.userAgent;
     }
-    fetch(x[1], { mode: 'no-cors', cache: 'no-store' }).then(function () { finish(true); }, function () { finish(false, '연결 거부'); });
+    fetch(x[1], { mode: 'no-cors', cache: 'no-store' }).then(function () { finish(true); }, function () { finish(false, L.refused); });
   });
 })();
 </script>

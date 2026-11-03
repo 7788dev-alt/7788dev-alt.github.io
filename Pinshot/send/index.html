@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Pinshot과 주고받기</title>
+<title data-i18n="title">Pinshot과 주고받기</title>
 <style>
   :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --accent: #007aff; --ok: #34c759; --bad: #d64545; }
   @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --accent: #4c8dff; --bad: #ff6b6b; } }
@@ -75,57 +75,64 @@
   .zoom { position: fixed; inset: 0; background: rgba(0,0,0,.8); display: flex; align-items: center; justify-content: center; z-index: 6; cursor: zoom-out; }
   .zoom img { max-width: 94vw; max-height: 94vh; border-radius: 8px; }
   [hidden] { display: none !important; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .lang { display: flex; gap: 2px; font-size: 13px; }
+  .lang button { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 6px; background: none; color: var(--ink2); }
+  .lang button.on { color: var(--ink); background: var(--bg); font-weight: 600; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Pinshot과 주고받기</h1>
+  <div class="head">
+    <h1 data-i18n="title">Pinshot과 주고받기</h1>
+    <div class="lang" id="lang" role="group" aria-label="Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="en" lang="en">English</button></div>
+  </div>
 
   <section id="wait">
     <div style="display:flex;flex-direction:column;gap:14px">
-      <p>아이폰 카메라로 QR을 비추거나, Pinshot의 + &gt; <b>PC에서 받기</b>에 아래 코드를 입력하세요.</p>
+      <p data-i18n-html="intro">아이폰 카메라로 QR을 비추거나, Pinshot의 + &gt; <b>PC에서 받기</b>에 아래 코드를 입력하세요.</p>
       <div class="pair">
-        <div id="qr" aria-label="연결 QR"></div>
+        <div id="qr" aria-label="연결 QR" data-i18n-aria="qrAria"></div>
         <div>
-          <div class="label">연결 코드</div>
+          <div class="label" data-i18n="codeLabel">연결 코드</div>
           <div class="code" id="code">…</div>
-          <div class="label">QR을 찍으면 아래 고른 대로 유지됩니다</div>
+          <div class="label" data-i18n="codeNote">QR을 찍으면 아래 고른 대로 유지됩니다</div>
         </div>
       </div>
       <div class="keep" id="keep">
-        <div class="label">연결 유지</div>
-        <label data-k="1h"><input type="radio" name="keep" value="1h" checked><span><b>1시간</b><small>1시간 동안 주고받은 게 없으면 끝납니다. 이 PC에는 아무것도 남지 않습니다.</small></span></label>
-        <label data-k="day"><input type="radio" name="keep" value="day"><span><b>오늘 하루</b><small>24시간 유지합니다. 창을 닫았다 열어도 QR 없이 이어집니다.</small></span></label>
-        <label data-k="trust"><input type="radio" name="keep" value="trust"><span><b>이 PC 신뢰</b><small>끊을 때까지 이어집니다. 내 PC에서만 고르세요. 이 브라우저에 연결이 저장됩니다.</small></span></label>
+        <div class="label" data-i18n="keepLabel">연결 유지</div>
+        <label data-k="1h"><input type="radio" name="keep" value="1h" checked><span><b data-i18n="keep1hT">1시간</b><small data-i18n="keep1hD">1시간 동안 주고받은 게 없으면 끝납니다. 이 PC에는 아무것도 남지 않습니다.</small></span></label>
+        <label data-k="day"><input type="radio" name="keep" value="day"><span><b data-i18n="keepDayT">오늘 하루</b><small data-i18n="keepDayD">24시간 유지합니다. 창을 닫았다 열어도 QR 없이 이어집니다.</small></span></label>
+        <label data-k="trust"><input type="radio" name="keep" value="trust"><span><b data-i18n="keepTrustT">이 PC 신뢰</b><small data-i18n="keepTrustD">끊을 때까지 이어집니다. 내 PC에서만 고르세요. 이 브라우저에 연결이 저장됩니다.</small></span></label>
       </div>
-      <div class="status"><span class="dot"></span><span>아이폰과 연결되기를 기다리는 중…</span></div>
+      <div class="status"><span class="dot"></span><span data-i18n="waiting">아이폰과 연결되기를 기다리는 중…</span></div>
     </div>
   </section>
 
   <section id="conn" hidden>
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div class="status"><span class="dot ok"></span><span>아이폰과 연결됐습니다</span></div>
+      <div class="status"><span class="dot ok"></span><span data-i18n="connected">아이폰과 연결됐습니다</span></div>
       <div class="route" id="route" role="status" aria-live="polite"></div>
       <div class="keepnote" id="keepnote"></div>
       <div class="ptabs" id="ptabs" role="tablist">
-        <button type="button" data-tab="send" class="on" role="tab">아이폰으로 보내기</button>
-        <button type="button" data-tab="inbox" role="tab">아이폰에서 받음<span class="badge" id="inbadge" hidden></span></button>
+        <button type="button" data-tab="send" class="on" role="tab" data-i18n="tabSend">아이폰으로 보내기</button>
+        <button type="button" data-tab="inbox" role="tab"><span data-i18n="tabInbox">아이폰에서 받음</span><span class="badge" id="inbadge" hidden></span></button>
       </div>
       <div id="tsend" style="display:flex;flex-direction:column;gap:12px">
-        <div class="drop" id="drop" tabindex="0">여기를 누르고 붙여넣기(Ctrl+V)하거나 이미지를 끌어다 놓으세요. 여러 장이면 아래에 하나씩 쌓입니다.</div>
+        <div class="drop" id="drop" tabindex="0" data-i18n="drop">여기를 누르고 붙여넣기(Ctrl+V)하거나 이미지를 끌어다 놓으세요. 여러 장이면 아래에 하나씩 쌓입니다.</div>
         <div class="queue" id="queue"></div>
-        <div><button class="plain" id="addmemo" type="button">+ 메모 칸 추가</button></div>
+        <div><button class="plain" id="addmemo" type="button" data-i18n="addMemo">+ 메모 칸 추가</button></div>
         <div class="row">
-          <button class="plain" id="clear" type="button">모두 비우기</button>
+          <button class="plain" id="clear" type="button" data-i18n="clear">모두 비우기</button>
           <button id="send" type="button" disabled>보내기</button>
         </div>
       </div>
       <div id="tinbox" style="display:flex;flex-direction:column;gap:12px" hidden>
-        <label class="auto"><input type="checkbox" id="autocopy" checked><span><b>글이 오면 바로 복사</b><br>이 창이 앞에 있을 때만 됩니다. 아니면 [복사]를 누르세요.</span></label>
+        <label class="auto"><input type="checkbox" id="autocopy" checked><span data-i18n-html="autoCopy"><b>글이 오면 바로 복사</b><br>이 창이 앞에 있을 때만 됩니다. 아니면 [복사]를 누르세요.</span></label>
         <div class="inbox" id="inbox"></div>
         <div class="row" id="inboxfoot" hidden>
-          <span class="label">받은 것은 이 창에만 있고, 창을 닫으면 사라집니다.</span>
-          <button class="plain" id="inclear" type="button">모두 지우기</button>
+          <span class="label" data-i18n="inboxNote">받은 것은 이 창에만 있고, 창을 닫으면 사라집니다.</span>
+          <button class="plain" id="inclear" type="button" data-i18n="clearAll">모두 지우기</button>
         </div>
       </div>
       <div><button class="plain stop" id="stop" type="button">연결 끝내기</button></div>
@@ -137,17 +144,143 @@
   <section id="end" hidden>
     <div style="display:flex;flex-direction:column;gap:12px">
       <p id="endmsg">연결이 끝났습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.</p>
-      <div><button id="again" type="button">새로 연결</button></div>
+      <div><button id="again" type="button" data-i18n="again">새로 연결</button></div>
     </div>
   </section>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <p class="label">아이폰에서 PC로는 글을 보낼 수 있고, 같은 와이파이면 사진도 받습니다. 아이폰과 같은 와이파이면 서버를 거치지 않고 바로 보냅니다. 아니면 이 페이지에서 암호화돼 중계 서버를 거쳐 가고, 서버에는 암호화된 채로만 남았다가 아이폰이 받으면 지워집니다. 이미지는 보내기 전에 줄여서 보냅니다 (가로 1600px). <span id="relayname"></span></p>
+  <p class="label"><span data-i18n="footer">아이폰에서 PC로는 글을 보낼 수 있고, 같은 와이파이면 사진도 받습니다. 아이폰과 같은 와이파이면 서버를 거치지 않고 바로 보냅니다. 아니면 이 페이지에서 암호화돼 중계 서버를 거쳐 가고, 서버에는 암호화된 채로만 남았다가 아이폰이 받으면 지워집니다. 이미지는 보내기 전에 줄여서 보냅니다 (가로 1600px).</span> <span id="relayname"></span></p>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
+  // ── 언어: 주소 ?lang= → 전에 고른 것 → 브라우저 언어 → 영어 ──
+  var I18N = {
+    ko: {
+      title: 'Pinshot과 주고받기',
+      intro: '아이폰 카메라로 QR을 비추거나, Pinshot의 + &gt; <b>PC에서 받기</b>에 아래 코드를 입력하세요.',
+      qrAria: '연결 QR', codeLabel: '연결 코드', codeNote: 'QR을 찍으면 아래 고른 대로 유지됩니다', keepLabel: '연결 유지',
+      keep1hT: '1시간', keep1hD: '1시간 동안 주고받은 게 없으면 끝납니다. 이 PC에는 아무것도 남지 않습니다.',
+      keepDayT: '오늘 하루', keepDayD: '24시간 유지합니다. 창을 닫았다 열어도 QR 없이 이어집니다.',
+      keepTrustT: '이 PC 신뢰', keepTrustD: '끊을 때까지 이어집니다. 내 PC에서만 고르세요. 이 브라우저에 연결이 저장됩니다.',
+      waiting: '아이폰과 연결되기를 기다리는 중…', connected: '아이폰과 연결됐습니다',
+      tabSend: '아이폰으로 보내기', tabInbox: '아이폰에서 받음',
+      drop: '여기를 누르고 붙여넣기(Ctrl+V)하거나 이미지를 끌어다 놓으세요. 여러 장이면 아래에 하나씩 쌓입니다.',
+      addMemo: '+ 메모 칸 추가', clear: '모두 비우기', clearAll: '모두 지우기',
+      send: '보내기', sendN: '{n}개 보내기', sending: '보내는 중…',
+      autoCopy: '<b>글이 오면 바로 복사</b><br>이 창이 앞에 있을 때만 됩니다. 아니면 [복사]를 누르세요.',
+      inboxNote: '받은 것은 이 창에만 있고, 창을 닫으면 사라집니다.', again: '새로 연결',
+      footer: '아이폰에서 PC로는 글을 보낼 수 있고, 같은 와이파이면 사진도 받습니다. 아이폰과 같은 와이파이면 서버를 거치지 않고 바로 보냅니다. 아니면 이 페이지에서 암호화돼 중계 서버를 거쳐 가고, 서버에는 암호화된 채로만 남았다가 아이폰이 받으면 지워집니다. 이미지는 보내기 전에 줄여서 보냅니다 (가로 1600px).',
+      relay: '(중계: {name})', browser: '브라우저',
+      busyPhone: '다른 아이폰이 연결하려 해서 막았습니다 (한 번에 한 기기만)', busyPad: '다른 아이패드가 연결하려 해서 막았습니다 (한 번에 한 기기만)',
+      gotPhone: '아이폰이 {n}개를 가져갔습니다', gotPad: '아이패드가 {n}개를 가져갔습니다',
+      untilToday: '오늘 {time}', untilTomorrow: '내일 {time}',
+      noteTrust: '이 PC 신뢰 · 끊을 때까지 유지됩니다. 다음에 이 페이지를 열면 바로 이어집니다.',
+      noteDay: '오늘 하루 · {until}까지 유지됩니다. 창을 닫았다 열어도 이어집니다.',
+      note1h: '1시간 · 주고받은 게 없으면 1시간 뒤 끝납니다.',
+      stop1h: '연결 끝내기', stopSaved: '연결 끊기 (저장된 연결도 지움)',
+      sendErr: '보내지 못했습니다 ({status})', qrFail: 'QR을 불러오지 못했습니다. 코드를 입력하세요.',
+      endDefault: '연결이 끝났습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.',
+      endDay: '하루가 지나 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다.',
+      endIdle: '1시간 동안 주고받은 것이 없어 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다.',
+      endPhone: '아이폰에서 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.',
+      endSelf: '연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.',
+      limit: '아이폰이 오늘 서버로 받을 수 있는 이미지 {max}장을 다 받았습니다. 아이폰에서 광고를 보면 더 받을 수 있고, 아이폰과 같은 와이파이에 있으면 서버 없이 바로 보낼 수 있습니다.',
+      directOn: '<b>같은 와이파이 · 서버 없이 바로</b> 주고받습니다. 아이폰에서 글과 사진을 받을 수 있습니다.',
+      directTrying: '같은 와이파이인지 확인하는 중… (안 되면 서버를 거쳐 보냅니다)',
+      directOff: '<b>서버를 거쳐</b> 주고받습니다 (암호화). 아이폰에서는 글만 받습니다. 같은 와이파이면 자동으로 바로 연결되고 사진도 받습니다.',
+      directLog: '같은 와이파이로 바로 연결됐습니다 (서버를 거치지 않음)',
+      toastImg: '아이폰에서 사진이 왔습니다', toastTextCopied: '아이폰에서 글이 와서 복사했습니다', toastText: '아이폰에서 글이 왔습니다',
+      inboxEmpty: '아이폰 Pinshot의 <b>PC 연결 &gt; 보내기</b>에서 보낸 글이 여기에 나옵니다.',
+      inboxEmptyPhotos: '아이폰 Pinshot의 <b>PC 연결 &gt; 보내기</b>에서 보낸 글과 사진이 여기에 나옵니다.',
+      photo: '사진', chars: '{n}자', viaDirect: ' · 같은 와이파이로 바로', viaServer: ' · 서버 거침',
+      copy: '복사', copied: '복사됨', copyFail: '복사하지 못했습니다. 글을 끌어 골라 복사하세요.',
+      copyImage: '이미지 복사', copyImageFail: '이 브라우저는 이미지 복사를 못 합니다. [저장]을 쓰세요.',
+      save: '저장', saved: '저장됨', del: '지우기', placeholder: '보낼 글을 적으세요', remove: '빼기',
+      tooBig: '이미지가 너무 큽니다 (20MB까지).', tooBigShrunk: '줄여도 {size}라 보낼 수 없습니다 (5MB까지).',
+      pasted: '붙여넣은 이미지', sendFail: '보내지 못했습니다. 인터넷 연결을 확인하세요.',
+      sentLog: '{n}개를 보냈습니다', sentAllDirect: ' (서버 없이 바로)', sentSomeDirect: ' ({n}개는 서버 없이 바로)',
+      unavailable: '사용 불가', noCrypto: '이 브라우저에서는 암호화를 쓸 수 없습니다.'
+    },
+    en: {
+      title: 'Pinshot: Send & Receive',
+      intro: 'Point your iPhone camera at the QR code, or enter the code below in Pinshot under + &gt; <b>Receive from PC</b>.',
+      qrAria: 'Connection QR code', codeLabel: 'Connection code', codeNote: 'After scanning, the connection lasts as chosen below', keepLabel: 'Stay connected',
+      keep1hT: '1 hour', keep1hD: 'Ends after 1 hour with no activity. Nothing is left on this PC.',
+      keepDayT: 'For today', keepDayD: 'Stays connected for 24 hours. Reopening this window continues without the QR code.',
+      keepTrustT: 'Trust this PC', keepTrustD: 'Stays connected until you disconnect. Choose this only on your own PC. The connection is saved in this browser.',
+      waiting: 'Waiting for your iPhone to connect…', connected: 'Connected to your iPhone',
+      tabSend: 'Send to iPhone', tabInbox: 'Received from iPhone',
+      drop: 'Click here and paste (Ctrl+V), or drag images here. Multiple items stack up below.',
+      addMemo: '+ Add text box', clear: 'Clear All', clearAll: 'Clear All',
+      send: 'Send', sendN: 'Send {n}', sending: 'Sending…',
+      autoCopy: '<b>Copy text as soon as it arrives</b><br>Works only while this window is in front. Otherwise click [Copy].',
+      inboxNote: 'Received items exist only in this window and disappear when you close it.', again: 'New Connection',
+      footer: 'You can send text from iPhone to PC, and photos too on the same Wi-Fi. On the same Wi-Fi as your iPhone, items go directly without a server. Otherwise they’re encrypted in this page and pass through a relay server, where they stay encrypted and are deleted once your iPhone receives them. Images are resized before sending (1600 px wide).',
+      relay: '(relay: {name})', browser: 'Browser',
+      busyPhone: 'Blocked another iPhone from connecting (one device at a time)', busyPad: 'Blocked another iPad from connecting (one device at a time)',
+      gotPhone: 'iPhone took {n} item(s)', gotPad: 'iPad took {n} item(s)',
+      untilToday: '{time} today', untilTomorrow: '{time} tomorrow',
+      noteTrust: 'Trust this PC · stays connected until you disconnect. Opening this page next time continues right away.',
+      noteDay: 'For today · stays connected until {until}. Continues even if you close and reopen the window.',
+      note1h: '1 hour · ends after 1 hour with no activity.',
+      stop1h: 'End Connection', stopSaved: 'Disconnect (also clears the saved connection)',
+      sendErr: 'Couldn’t send ({status})', qrFail: 'Couldn’t load the QR code. Enter the code instead.',
+      endDefault: 'The connection has ended. Nothing is left on this PC. You can close this window.',
+      endDay: 'A day has passed, so the connection ended. Nothing is left on this PC.',
+      endIdle: 'The connection ended after 1 hour with no activity. Nothing is left on this PC.',
+      endPhone: 'The iPhone ended the connection. Nothing is left on this PC. You can close this window.',
+      endSelf: 'You ended the connection. Nothing is left on this PC. You can close this window.',
+      limit: 'Your iPhone has received all {max} images allowed through the server today. Watch an ad on the iPhone to receive more, or be on the same Wi-Fi to send directly without the server.',
+      directOn: '<b>Same Wi-Fi · direct, no server.</b> Your iPhone can send text and photos.',
+      directTrying: 'Checking for the same Wi-Fi… (falls back to the server if not)',
+      directOff: '<b>Via server</b> (encrypted). Only text can be received from the iPhone. On the same Wi-Fi it connects directly and photos work too.',
+      directLog: 'Connected directly over the same Wi-Fi (no server)',
+      toastImg: 'A photo arrived from your iPhone', toastTextCopied: 'Text arrived from your iPhone and was copied', toastText: 'Text arrived from your iPhone',
+      inboxEmpty: 'Text sent from <b>PC Connection &gt; Send</b> in Pinshot on your iPhone appears here.',
+      inboxEmptyPhotos: 'Text and photos sent from <b>PC Connection &gt; Send</b> in Pinshot on your iPhone appear here.',
+      photo: 'Photo', chars: '{n} chars', viaDirect: ' · direct over Wi-Fi', viaServer: ' · via server',
+      copy: 'Copy', copied: 'Copied', copyFail: 'Couldn’t copy. Select the text and copy it.',
+      copyImage: 'Copy Image', copyImageFail: 'This browser can’t copy images. Use [Save].',
+      save: 'Save', saved: 'Saved', del: 'Delete', placeholder: 'Type text to send', remove: 'Remove',
+      tooBig: 'The image is too large (up to 20 MB).', tooBigShrunk: 'Still {size} after resizing, so it can’t be sent (up to 5 MB).',
+      pasted: 'Pasted image', sendFail: 'Couldn’t send. Check your internet connection.',
+      sentLog: 'Sent {n}', sentAllDirect: ' (direct, no server)', sentSomeDirect: ' ({n} direct, no server)',
+      unavailable: 'Unavailable', noCrypto: 'Encryption isn’t available in this browser.'
+    }
+  };
+  var LANG_STORE = 'pinshotLang';
+  function pickLang() {
+    try { var q = new URLSearchParams(location.search).get('lang'); if (q && I18N[q.slice(0, 2)]) return q.slice(0, 2); } catch (e) {}
+    try { var s = localStorage.getItem(LANG_STORE); if (s && I18N[s]) return s; } catch (e) {}
+    var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < list.length; i++) { var c = String(list[i]).slice(0, 2).toLowerCase(); if (I18N[c]) return c; }
+    return 'en';
+  }
+  var LANG = pickLang();
+  function t(key, vars) {
+    var s = (I18N[LANG] && I18N[LANG][key]) || I18N.ko[key] || key;
+    if (vars) s = s.replace(/\{(\w+)\}/g, function (_, k) { return vars[k] != null ? vars[k] : ''; });
+    return s;
+  }
+  // 시각 표기도 화면 언어로 (영어면 브라우저의 영어 지역 형식, 없으면 en-US)
+  function timeLocale() {
+    if (LANG === 'ko') return 'ko-KR';
+    var list = navigator.languages || [];
+    for (var i = 0; i < list.length; i++) if (/^en/i.test(list[i])) return list[i];
+    return 'en-US';
+  }
+  function clock(d) { return d.toLocaleTimeString(timeLocale(), { hour: 'numeric', minute: '2-digit' }); }
+  function applyStatic() {
+    document.documentElement.lang = LANG;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { el.textContent = t(el.dataset.i18n); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-html]'), function (el) { el.innerHTML = t(el.dataset.i18nHtml); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-aria]'), function (el) { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    Array.prototype.forEach.call(document.querySelectorAll('#lang button'), function (b) { b.classList.toggle('on', b.dataset.lang === LANG); b.setAttribute('aria-pressed', b.dataset.lang === LANG); });
+  }
+  applyStatic();
+
   // 앱(PinshotApp > PCReceive.swift)과 같은 규칙을 써야 한다.
   // 중계 서버: Firebase 실시간 DB(기본, 회사 보안망에서도 열린다) → 안 되면 ntfy.sh(예비).
   // 고른 쪽을 QR 에 r=f / r=n 으로 담아 아이폰도 같은 쪽을 쓰게 한다.
@@ -181,21 +314,17 @@
   function pcLabel() {
     var ua = navigator.userAgent || '';
     var os = /Windows/i.test(ua) ? 'Windows' : /Mac OS X|Macintosh/i.test(ua) ? 'Mac' : /CrOS/i.test(ua) ? 'ChromeOS' : /Linux/i.test(ua) ? 'Linux' : 'PC';
-    var br = /Edg\//.test(ua) ? 'Edge' : /Whale\//.test(ua) ? 'Whale' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '브라우저';
+    var br = /Edg\//.test(ua) ? 'Edge' : /Whale\//.test(ua) ? 'Whale' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : t('browser');
     return os + ' · ' + br;
   }
   function sendPcInfo(to) {
     post({ type: 'pcinfo', label: pcLabel(), to: to }).catch(function () {});
   }
-  function kindName(kind) { return kind === 'iPad' ? '아이패드' : '아이폰'; }
-  function kindSubject(kind) { return kind === 'iPad' ? '아이패드가' : '아이폰이'; }
-  function untilText() { var d = new Date(keepUntil), today = new Date().toDateString() === d.toDateString(); return (today ? '오늘 ' : '내일 ') + (d.getHours() < 12 ? '오전 ' : '오후 ') + ((d.getHours() % 12) || 12) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function untilText() { var d = new Date(keepUntil), today = new Date().toDateString() === d.toDateString(); return t(today ? 'untilToday' : 'untilTomorrow', { time: clock(d) }); }
   function drawKeep() {
     Array.prototype.forEach.call(document.querySelectorAll('#keep label'), function (l) { var on = l.dataset.k === keep; l.classList.toggle('on', on); l.querySelector('input').checked = on; });
-    $('keepnote').textContent = keep === 'trust' ? '이 PC 신뢰 · 끊을 때까지 유지됩니다. 다음에 이 페이지를 열면 바로 이어집니다.'
-      : keep === 'day' ? '오늘 하루 · ' + untilText() + '까지 유지됩니다. 창을 닫았다 열어도 이어집니다.'
-      : '1시간 · 주고받은 게 없으면 1시간 뒤 끝납니다.';
-    $('stop').textContent = keep === '1h' ? '연결 끝내기' : '연결 끊기 (저장된 연결도 지움)';
+    $('keepnote').textContent = keep === 'trust' ? t('noteTrust') : keep === 'day' ? t('noteDay', { until: untilText() }) : t('note1h');
+    $('stop').textContent = keep === '1h' ? t('stop1h') : t('stopSaved');
   }
   function show(name) { ['wait', 'conn', 'end'].forEach(function (n) { $(n).hidden = n !== name; }); }
   function b64(bytes) { var s = ''; for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
@@ -241,7 +370,7 @@
   function fbUrl(path) { return FB + 'ps/' + session.topic + '/' + path + '.json'; }
   async function fbSend(method, path, value) {
     var res = await fetch(fbUrl(path), { method: method, body: JSON.stringify(value) });
-    if (!res.ok) throw new Error('보내지 못했습니다 (' + res.status + ')');
+    if (!res.ok) throw new Error(t('sendErr', { status: res.status }));
     return res;
   }
 
@@ -268,7 +397,7 @@
       init.body = await sealMeta(meta);
     }
     var res = await fetch(url, init);
-    if (!res.ok) throw new Error('보내지 못했습니다 (' + res.status + ')');
+    if (!res.ok) throw new Error(t('sendErr', { status: res.status }));
   }
 
   async function start() {
@@ -277,7 +406,7 @@
     var s0 = saved();
     if (s0 && s0.code && (s0.keep === 'trust' || (s0.keep === 'day' && Date.now() < s0.until))) {
       keep = s0.keep; keepUntil = s0.until || 0; relay = s0.relay || 'f';
-      $('relayname').textContent = '(중계: ' + (relay === 'f' ? 'Firebase' : 'ntfy.sh') + ')';
+      drawRelay();
       session = await derive(s0.code);
       session.code = s0.code;
       session.connected = true;
@@ -301,9 +430,9 @@
     show('wait');
     // 열리는 중계 서버를 고른 뒤에 QR 을 그린다 (QR 에 중계 서버를 함께 담는다)
     relay = await pickRelay();
-    $('relayname').textContent = '(중계: ' + (relay === 'f' ? 'Firebase' : 'ntfy.sh') + ')';
+    drawRelay();
     if (window.QRCode) new QRCode($('qr'), { text: 'pinshot://recv?c=' + code + '&r=' + relay, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
-    else $('qr').textContent = 'QR을 불러오지 못했습니다. 코드를 입력하세요.';
+    else $('qr').textContent = t('qrFail');
     session = await derive(code);
     session.code = code;
     session.connected = false;
@@ -353,21 +482,26 @@
     retryTimer = null;
   }
 
+  function drawRelay() { $('relayname').textContent = relay ? t('relay', { name: relay === 'f' ? 'Firebase' : 'ntfy.sh' }) : ''; }
+
+  // 끝난 화면 문장은 키로 기억해 언어를 바꿔도 다시 그린다
+  var endKey = 'endDefault';
   function finish(message) {
+    endKey = message;
     stop();
     rtcClose();
     forget();
     session = null;
     queue.forEach(function (q) { if (q.url) URL.revokeObjectURL(q.url); });
     $('log').innerHTML = ''; resetQueue(); inboxReset();
-    $('endmsg').textContent = message;
+    $('endmsg').textContent = t(message);
     show('end');
   }
 
   function checkIdle() {
     if (!session) return;
-    if (keep === 'day' && session.connected && Date.now() > keepUntil) end('하루가 지나 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다.');
-    else if (keep === '1h' && Date.now() - lastActive > IDLE_MS) end('1시간 동안 주고받은 것이 없어 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다.');
+    if (keep === 'day' && session.connected && Date.now() > keepUntil) end('endDay');
+    else if (keep === '1h' && Date.now() - lastActive > IDLE_MS) end('endIdle');
   }
 
   // 중계 서버와 연결 하나를 열어 두고, 새 메시지가 오면 서버가 밀어 준다.
@@ -440,7 +574,7 @@
       } else if (other) {
         // 다른 기기가 같은 코드로 들어오려 함 → 그 기기에 알리고 막는다 (방금 온 것만 기록에 남긴다)
         post({ type: 'busy', to: meta.device, kind: session.kind }).catch(function () {});
-        if (Date.now() - (meta.time || 0) < 120000) addLog('다른 ' + kindSubject(meta.kind) + ' 연결하려 해서 막았습니다 (한 번에 한 기기만)');
+        if (Date.now() - (meta.time || 0) < 120000) addLog(t(meta.kind === 'iPad' ? 'busyPad' : 'busyPhone'));
       }
       return;
     }
@@ -450,8 +584,8 @@
     if (meta.type === 'rtc-hi') { if (fresh && !rtc.ready) rtcOffer(); return; }
     if (meta.type === 'rtc-answer') { if (fresh) rtcAnswer(meta.sdp); return; }
     // 오늘 중계 서버로 받을 수 있는 양을 넘었다 (같은 와이파이로 바로 보내는 것은 상관없다)
-    if (meta.type === 'limit') { if (fresh) fail('아이폰이 오늘 서버로 받을 수 있는 이미지 ' + (meta.max || '') + '장을 다 받았습니다. 아이폰에서 광고를 보면 더 받을 수 있고, 아이폰과 같은 와이파이에 있으면 서버 없이 바로 보낼 수 있습니다.'); return; }
-    if (meta.type === 'got') addLog(kindSubject(session.kind) + ' ' + meta.count + '개를 가져갔습니다');
+    if (meta.type === 'limit') { if (fresh) fail(t('limit', { max: meta.max || '' })); return; }
+    if (meta.type === 'got') addLog(t(session.kind === 'iPad' ? 'gotPad' : 'gotPhone', { n: meta.count }));
     // 아이폰에서 서버를 거쳐 보낸 글: 받고, 받았다고 알리고, Firebase 에서는 지운다 (창을 다시 열어도 또 나오지 않게)
     // (ntfy 는 지울 수 없어 창을 다시 열면 지난 것이 또 온다 → 30분 지난 것은 건너뛴다)
     if (meta.type === 'text' && meta.text && !(relay === 'n' && Date.now() - (meta.time || 0) > 30 * 60000)) {
@@ -462,7 +596,7 @@
     if (meta.type === 'bye') {
       // 끝낸 쪽 대신 받은 쪽이 Firebase 에 남은 방을 지운다
       if (relay === 'f') fetch(FB + 'ps/' + session.topic + '.json', { method: 'DELETE' }).catch(function () {});
-      finish('아이폰에서 연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.');
+      finish('endPhone');
     }
   }
 
@@ -478,9 +612,9 @@
     var el = $('route');
     if (!el) return;
     el.classList.toggle('on', !!rtc.ready);
-    if (rtc.ready) el.innerHTML = WIFI + '<span><b>같은 와이파이 · 서버 없이 바로</b> 주고받습니다. 아이폰에서 글과 사진을 받을 수 있습니다.</span>';
-    else if (rtc.pc) el.innerHTML = WIFI + '<span>같은 와이파이인지 확인하는 중… (안 되면 서버를 거쳐 보냅니다)</span>';
-    else el.innerHTML = CLOUD + '<span><b>서버를 거쳐</b> 주고받습니다 (암호화). 아이폰에서는 글만 받습니다. 같은 와이파이면 자동으로 바로 연결되고 사진도 받습니다.</span>';
+    if (rtc.ready) el.innerHTML = WIFI + '<span>' + t('directOn') + '</span>';
+    else if (rtc.pc) el.innerHTML = WIFI + '<span>' + t('directTrying') + '</span>';
+    else el.innerHTML = CLOUD + '<span>' + t('directOff') + '</span>';
   }
   function rtcClose() {
     setTimeout(function () { if (inbox && !inbox.length) drawInbox(); }, 0);
@@ -506,7 +640,7 @@
     dc.binaryType = 'arraybuffer';
     rtc.pc = pc; rtc.dc = dc;
     drawDirect();
-    dc.onopen = function () { if (rtc.dc !== dc) return; rtc.ready = true; drawDirect(); if (!inbox.length) drawInbox(); addLog('같은 와이파이로 바로 연결됐습니다 (서버를 거치지 않음)'); };
+    dc.onopen = function () { if (rtc.dc !== dc) return; rtc.ready = true; drawDirect(); if (!inbox.length) drawInbox(); addLog(t('directLog')); };
     dc.onclose = function () { if (rtc.dc !== dc) return; rtc.ready = false; drawDirect(); };
     // 아이폰 → PC: item(설명) → 바이트 조각 → end. 다 받으면 ack (앱은 이걸 받아야 '받음'으로 표시한다)
     var cur = null;
@@ -579,13 +713,13 @@
   }
   function drawBadge() {
     $('inbadge').hidden = !unseen; $('inbadge').textContent = unseen;
-    document.title = (freshCount ? '(' + freshCount + ') ' : '') + 'Pinshot과 주고받기';
+    document.title = (freshCount ? '(' + freshCount + ') ' : '') + t('title');
   }
   function toast(msg) {
     var t = $('toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
   }
-  function hhmm(ms) { var d = new Date(ms || Date.now()); return (d.getHours() < 12 ? '오전 ' : '오후 ') + ((d.getHours() % 12) || 12) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function hhmm(ms) { return clock(new Date(ms || Date.now())); }
   function copyText(text) {
     try { return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; }); } catch (e) { return Promise.resolve(false); }
   }
@@ -614,7 +748,7 @@
       if (tab !== 'inbox') { if (!ready().length && !sending) showTab('inbox'); else unseen++; }
       if (document.hidden || !document.hasFocus()) freshCount++;
       drawBadge(); drawInbox();
-      toast(it.kind === 'image' ? '아이폰에서 사진이 왔습니다' : (copied ? '아이폰에서 글이 와서 복사했습니다' : '아이폰에서 글이 왔습니다'));
+      toast(t(it.kind === 'image' ? 'toastImg' : (copied ? 'toastTextCopied' : 'toastText')));
       setTimeout(function () { it.fresh = false; drawInbox(); }, 2500);
       if (copied) setTimeout(function () { it.copied = false; drawInbox(); }, 2500);
     };
@@ -625,7 +759,7 @@
     box.innerHTML = '';
     $('inboxfoot').hidden = !inbox.length;
     if (!inbox.length) {
-      box.innerHTML = '<div class="pempty">아이폰 Pinshot의 <b>PC 연결 &gt; 보내기</b>에서 보낸 글' + (rtc.ready ? '과 사진' : '') + '이 여기에 나옵니다.</div>';
+      box.innerHTML = '<div class="pempty">' + t(rtc.ready ? 'inboxEmptyPhotos' : 'inboxEmpty') + '</div>';
       return;
     }
     inbox.forEach(function (it) {
@@ -637,23 +771,23 @@
       }
       var body = document.createElement('div'); body.className = 'body';
       var txt = document.createElement('div'); txt.className = 'txt';
-      txt.textContent = it.kind === 'text' ? it.text : (it.name || '사진');
+      txt.textContent = it.kind === 'text' ? it.text : (it.name || t('photo'));
       body.appendChild(txt);
       var when = document.createElement('div'); when.className = 'when';
-      when.textContent = hhmm(it.time) + ' · ' + (it.kind === 'text' ? it.text.length.toLocaleString() + '자' : sizeText(it.bytes.length)) + (it.direct ? ' · 같은 와이파이로 바로' : ' · 서버 거침');
+      when.textContent = hhmm(it.time) + ' · ' + (it.kind === 'text' ? t('chars', { n: it.text.length.toLocaleString(timeLocale()) }) : sizeText(it.bytes.length)) + t(it.direct ? 'viaDirect' : 'viaServer');
       body.appendChild(when);
       row.appendChild(body);
       var acts = document.createElement('div'); acts.className = 'acts';
       var btn = function (label, cls, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sbtn ' + cls; b.textContent = label; b.addEventListener('click', fn); acts.appendChild(b); return b; };
       if (it.kind === 'text') {
-        btn(it.copied ? '복사됨' : '복사', it.copied ? 'done' : 'pri', function () {
-          copyText(it.text).then(function (ok) { if (!ok) return toast('복사하지 못했습니다. 글을 끌어 골라 복사하세요.'); it.copied = true; drawInbox(); setTimeout(function () { it.copied = false; drawInbox(); }, 1600); });
+        btn(it.copied ? t('copied') : t('copy'), it.copied ? 'done' : 'pri', function () {
+          copyText(it.text).then(function (ok) { if (!ok) return toast(t('copyFail')); it.copied = true; drawInbox(); setTimeout(function () { it.copied = false; drawInbox(); }, 1600); });
         });
       } else {
-        btn(it.icopied ? '복사됨' : '이미지 복사', it.icopied ? 'done' : 'pri', function () {
-          copyImage(it).then(function (ok) { if (!ok) return toast('이 브라우저는 이미지 복사를 못 합니다. [저장]을 쓰세요.'); it.icopied = true; drawInbox(); setTimeout(function () { it.icopied = false; drawInbox(); }, 1600); });
+        btn(it.icopied ? t('copied') : t('copyImage'), it.icopied ? 'done' : 'pri', function () {
+          copyImage(it).then(function (ok) { if (!ok) return toast(t('copyImageFail')); it.icopied = true; drawInbox(); setTimeout(function () { it.icopied = false; drawInbox(); }, 1600); });
         });
-        btn(it.saved ? '저장됨' : '저장', it.saved ? 'done' : '', function () {
+        btn(it.saved ? t('saved') : t('save'), it.saved ? 'done' : '', function () {
           var a = document.createElement('a'); a.href = it.url;
           var d = new Date(it.time), ext = it.type === 'image/png' ? '.png' : it.type === 'image/webp' ? '.webp' : '.jpg';
           a.download = 'Pinshot-' + d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '-' + ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + ('0' + d.getSeconds()).slice(-2) + ext;
@@ -661,7 +795,7 @@
           it.saved = true; drawInbox();
         });
       }
-      btn('지우기', 'x', function () { if (it.url) URL.revokeObjectURL(it.url); inbox = inbox.filter(function (x) { return x !== it; }); drawInbox(); });
+      btn(t('del'), 'x', function () { if (it.url) URL.revokeObjectURL(it.url); inbox = inbox.filter(function (x) { return x !== it; }); drawInbox(); });
       row.appendChild(acts);
       box.appendChild(row);
     });
@@ -690,7 +824,7 @@
   function sync() {
     var n = ready().length;
     $('send').disabled = sending || !n;
-    $('send').textContent = sending ? '보내는 중…' : (n > 1 ? n + '개 보내기' : '보내기');
+    $('send').textContent = sending ? t('sending') : (n > 1 ? t('sendN', { n: n }) : t('send'));
   }
   function fail(msg) { $('err').textContent = msg; $('err').hidden = !msg; }
   function resetQueue() { queue = [emptyMemo()]; draw(); sync(); }
@@ -704,12 +838,12 @@
         var img = document.createElement('img'); img.alt = ''; img.src = q.url; row.appendChild(img);
         var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = q.label || q.name; row.appendChild(nm);
       } else {
-        var ta = document.createElement('textarea'); ta.placeholder = '보낼 글을 적으세요'; ta.value = q.text;
+        var ta = document.createElement('textarea'); ta.placeholder = t('placeholder'); ta.value = q.text;
         ta.addEventListener('input', function () { q.text = ta.value; sync(); });
         ta.addEventListener('paste', onPaste);
         row.appendChild(ta);
       }
-      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.setAttribute('aria-label', '빼기');
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.textContent = '×'; rm.setAttribute('aria-label', t('remove'));
       rm.addEventListener('click', function () {
         if (q.url) URL.revokeObjectURL(q.url);
         queue = queue.filter(function (x) { return x !== q; });
@@ -755,11 +889,11 @@
 
   function takeImage(file) {
     if (!file || !/^image\//.test(file.type)) return;
-    if (file.size > MAX_IMAGE) { fail('이미지가 너무 큽니다 (20MB까지).'); return; }
+    if (file.size > MAX_IMAGE) { fail(t('tooBig')); return; }
     fail('');
     shrink(file).then(function (bytes) {
-      if (bytes.length > MAX_SEND) { fail('줄여도 ' + sizeText(bytes.length) + '라 보낼 수 없습니다 (5MB까지).'); return; }
-      var base = file.name && file.name !== 'image.png' ? file.name : '붙여넣은 이미지';
+      if (bytes.length > MAX_SEND) { fail(t('tooBigShrunk', { size: sizeText(bytes.length) })); return; }
+      var base = file.name && file.name !== 'image.png' ? file.name : t('pasted');
       var item = { id: ++qseq, kind: 'img', bytes: bytes, url: URL.createObjectURL(file), name: base, label: base + ' · ' + sizeText(bytes.length) };
       // 비어 있는 메모 칸보다 앞에 넣는다
       var at = queue.findIndex(function (x) { return x.kind === 'text' && !x.text.trim(); });
@@ -784,7 +918,7 @@
   Array.prototype.forEach.call(document.querySelectorAll('#keep input'), function (r) { r.addEventListener('change', function () { keep = r.value; drawKeep(); }); });
   resetQueue();
   $('again').addEventListener('click', start);
-  $('stop').addEventListener('click', function () { end('연결을 끝냈습니다. 이 PC에는 아무것도 남지 않습니다. 창을 닫아도 됩니다.'); });
+  $('stop').addEventListener('click', function () { end('endSelf'); });
 
   $('send').addEventListener('click', async function () {
     if (!session) return;
@@ -814,14 +948,23 @@
       }
       lastActive = Date.now();
     } catch (e) {
-      fail((e && e.message) || '보내지 못했습니다. 인터넷 연결을 확인하세요.');
+      fail((e && e.message) || t('sendFail'));
     }
-    if (sent) addLog(sent + '개를 보냈습니다' + (direct ? (direct === sent ? ' (서버 없이 바로)' : ' (' + direct + '개는 서버 없이 바로)') : ''));
+    if (sent) addLog(t('sentLog', { n: sent }) + (direct ? (direct === sent ? t('sentAllDirect') : t('sentSomeDirect', { n: direct })) : ''));
     if (!queue.some(function (x) { return x.kind === 'text'; })) queue.push(emptyMemo());
     sending = false; draw(); sync();
   });
 
-  if (!window.crypto || !crypto.subtle) { $('code').textContent = '사용 불가'; fail('이 브라우저에서는 암호화를 쓸 수 없습니다.'); return; }
+  // 언어 바꾸기: 연결은 그대로 두고 글자만 다시 그린다
+  $('lang').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.dataset.lang === LANG) return;
+    LANG = b.dataset.lang;
+    try { localStorage.setItem(LANG_STORE, LANG); } catch (err) {}
+    applyStatic(); drawKeep(); drawDirect(); drawInbox(); draw(); sync(); drawBadge(); drawRelay();
+    $('endmsg').textContent = t(endKey);
+  });
+
+  if (!window.crypto || !crypto.subtle) { $('code').textContent = t('unavailable'); fail(t('noCrypto')); return; }
   start();
 })();
 </script>
