@@ -76,7 +76,9 @@
   .zoom img { max-width: 94vw; max-height: 94vh; border-radius: 8px; }
   [hidden] { display: none !important; }
   .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  .lang { display: flex; gap: 2px; font-size: 13px; }
+  .lang { display: flex; gap: 2px; font-size: 13px; flex-wrap: wrap; }
+  :lang(ja) { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", "Noto Sans JP", sans-serif; }
+  :lang(zh) { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
   .lang button { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 6px; background: none; color: var(--ink2); }
   .lang button.on { color: var(--ink); background: var(--bg); font-weight: 600; }
 </style>
@@ -85,7 +87,7 @@
 <main>
   <div class="head">
     <h1 data-i18n="title">Pinshot과 주고받기</h1>
-    <div class="lang" id="lang" role="group" aria-label="Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="en" lang="en">English</button></div>
+    <div class="lang" id="lang" role="group" aria-label="Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="zh" lang="zh-Hans">中文</button><button type="button" data-lang="ja" lang="ja">日本語</button><button type="button" data-lang="en" lang="en">English</button></div>
   </div>
 
   <section id="wait">
@@ -95,7 +97,7 @@
         <div id="qr" aria-label="연결 QR" data-i18n-aria="qrAria"></div>
         <div>
           <div class="label" data-i18n="codeLabel">연결 코드</div>
-          <div class="code" id="code">…</div>
+          <div class="code" id="code" translate="no">…</div>
           <div class="label" data-i18n="codeNote">QR을 찍으면 아래 고른 대로 유지됩니다</div>
         </div>
       </div>
@@ -155,7 +157,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
-  // ── 언어: 주소 ?lang= → 전에 고른 것 → 브라우저 언어 → 영어 ──
+  // ── 언어 (한국어 · 중국어 간체 · 일본어 · 영어): 주소 ?lang= → 전에 고른 것 → 브라우저 언어 → 영어 ──
+  // 중국어는 간체 하나 (zh-TW · zh-HK 도 zh 로). 새 문장은 네 언어 모두 사전에 넣는다.
   var I18N = {
     ko: {
       title: 'Pinshot과 주고받기',
@@ -248,6 +251,98 @@
       pasted: 'Pasted image', sendFail: 'Couldn’t send. Check your internet connection.',
       sentLog: 'Sent {n}', sentAllDirect: ' (direct, no server)', sentSomeDirect: ' ({n} direct, no server)',
       unavailable: 'Unavailable', noCrypto: 'Encryption isn’t available in this browser.'
+    },
+    ja: {
+      title: 'Pinshot 送受信',
+      intro: 'iPhone のカメラで QR コードを読み取るか、Pinshot の + &gt; <b>PCから受け取る</b>（英語表示: Receive from PC）に下のコードを入力してください。',
+      qrAria: '接続用 QR コード', codeLabel: '接続コード', codeNote: 'QR を読み取ると、下で選んだ方法で接続が続きます', keepLabel: '接続の維持',
+      keep1hT: '1時間', keep1hD: '1時間やり取りがなければ終了します。この PC には何も残りません。',
+      keepDayT: '今日だけ', keepDayD: '24時間つながります。ウインドウを閉じて開き直しても QR なしで続きます。',
+      keepTrustT: 'この PC を信頼', keepTrustD: '切断するまで続きます。自分の PC でだけ選んでください。このブラウザに接続が保存されます。',
+      waiting: 'iPhone の接続を待っています…', connected: 'iPhone と接続しました',
+      tabSend: 'iPhone へ送る', tabInbox: 'iPhone から受信',
+      drop: 'ここをクリックして貼り付け（Ctrl+V）するか、画像をドラッグしてください。複数ある場合は下に順に並びます。',
+      addMemo: '+ メモ欄を追加', clear: 'すべてクリア', clearAll: 'すべて削除',
+      send: '送信', sendN: '{n}件送信', sending: '送信中…',
+      autoCopy: '<b>テキストが届いたらすぐコピー</b><br>このウインドウが前面にあるときだけ動作します。そうでなければ［コピー］を押してください。',
+      inboxNote: '受け取ったものはこのウインドウにだけあり、閉じると消えます。', again: '新しく接続',
+      footer: 'iPhone から PC へテキストを送れます。同じ Wi-Fi なら写真も受け取れます。iPhone と同じ Wi-Fi ならサーバーを通さず直接送ります。そうでない場合はこのページで暗号化され中継サーバーを経由し、サーバーには暗号化されたまま残り、iPhone が受け取ると削除されます。画像は送る前に縮小します（横 1600px）。',
+      relay: '（中継: {name}）', browser: 'ブラウザ',
+      busyPhone: '別の iPhone が接続しようとしたのでブロックしました（同時に 1 台まで）', busyPad: '別の iPad が接続しようとしたのでブロックしました（同時に 1 台まで）',
+      gotPhone: 'iPhone が {n} 件を受け取りました', gotPad: 'iPad が {n} 件を受け取りました',
+      untilToday: '今日 {time}', untilTomorrow: '明日 {time}',
+      noteTrust: 'この PC を信頼 · 切断するまで続きます。次にこのページを開くとすぐつながります。',
+      noteDay: '今日だけ · {until} まで続きます。ウインドウを閉じて開き直しても続きます。',
+      note1h: '1時間 · やり取りがなければ 1 時間後に終了します。',
+      stop1h: '接続を終了', stopSaved: '切断（保存した接続も削除）',
+      sendErr: '送信できませんでした（{status}）', qrFail: 'QR コードを読み込めませんでした。コードを入力してください。',
+      endDefault: '接続を終了しました。この PC には何も残りません。ウインドウを閉じてかまいません。',
+      endDay: '1 日経ったので接続を終了しました。この PC には何も残りません。',
+      endIdle: '1 時間やり取りがなかったので接続を終了しました。この PC には何も残りません。',
+      endPhone: 'iPhone 側で接続を終了しました。この PC には何も残りません。ウインドウを閉じてかまいません。',
+      endSelf: '接続を終了しました。この PC には何も残りません。ウインドウを閉じてかまいません。',
+      limit: 'iPhone は今日サーバー経由で受け取れる画像 {max} 枚をすべて受け取りました。iPhone で広告を見るとさらに受け取れます。iPhone と同じ Wi-Fi ならサーバーなしで直接送れます。',
+      directOn: '<b>同じ Wi-Fi · サーバーなしで直接</b>やり取りします。iPhone からテキストと写真を受け取れます。',
+      directTrying: '同じ Wi-Fi か確認しています…（だめならサーバー経由で送ります）',
+      directOff: '<b>サーバー経由</b>でやり取りします（暗号化）。iPhone からはテキストのみ受け取れます。同じ Wi-Fi なら自動で直接つながり、写真も受け取れます。',
+      directLog: '同じ Wi-Fi で直接つながりました（サーバーを通しません）',
+      toastImg: 'iPhone から写真が届きました', toastTextCopied: 'iPhone からテキストが届き、コピーしました', toastText: 'iPhone からテキストが届きました',
+      inboxEmpty: 'iPhone の Pinshot の <b>PC接続 &gt; 送る</b>（PC Connection &gt; Send）から送ったテキストがここに表示されます。',
+      inboxEmptyPhotos: 'iPhone の Pinshot の <b>PC接続 &gt; 送る</b>（PC Connection &gt; Send）から送ったテキストと写真がここに表示されます。',
+      photo: '写真', chars: '{n}文字', viaDirect: ' · 同じ Wi-Fi で直接', viaServer: ' · サーバー経由',
+      copy: 'コピー', copied: 'コピー済み', copyFail: 'コピーできませんでした。テキストを選択してコピーしてください。',
+      copyImage: '画像をコピー', copyImageFail: 'このブラウザは画像をコピーできません。［保存］を使ってください。',
+      save: '保存', saved: '保存済み', del: '削除', placeholder: '送るテキストを入力', remove: '外す',
+      tooBig: '画像が大きすぎます（20MB まで）。', tooBigShrunk: '縮小しても {size} のため送れません（5MB まで）。',
+      pasted: '貼り付けた画像', sendFail: '送信できませんでした。インターネット接続を確認してください。',
+      sentLog: '{n} 件送信しました', sentAllDirect: '（サーバーなしで直接）', sentSomeDirect: '（うち {n} 件はサーバーなしで直接）',
+      unavailable: '利用不可', noCrypto: 'このブラウザでは暗号化を使えません。'
+    },
+    zh: {
+      title: 'Pinshot 互传',
+      intro: '用 iPhone 相机扫描二维码，或在 Pinshot 的 + &gt; <b>从电脑接收</b>（英文界面: Receive from PC）中输入下面的代码。',
+      qrAria: '连接二维码', codeLabel: '连接代码', codeNote: '扫描二维码后，将按下方所选方式保持连接', keepLabel: '保持连接',
+      keep1hT: '1 小时', keep1hD: '1 小时内没有收发就会结束。这台电脑上不会留下任何内容。',
+      keepDayT: '今天', keepDayD: '保持 24 小时。关闭窗口后重新打开，无需二维码即可继续。',
+      keepTrustT: '信任此电脑', keepTrustD: '保持到断开为止。请只在自己的电脑上选择。连接会保存在此浏览器中。',
+      waiting: '正在等待 iPhone 连接…', connected: '已与 iPhone 连接',
+      tabSend: '发送到 iPhone', tabInbox: '从 iPhone 收到',
+      drop: '点击这里粘贴（Ctrl+V），或把图片拖到这里。多个项目会在下方依次排列。',
+      addMemo: '+ 添加文本框', clear: '全部清空', clearAll: '全部删除',
+      send: '发送', sendN: '发送 {n} 项', sending: '正在发送…',
+      autoCopy: '<b>收到文字后立即复制</b><br>仅在此窗口位于最前时有效。否则请点［复制］。',
+      inboxNote: '收到的内容只保存在此窗口中，关闭窗口后即消失。', again: '重新连接',
+      footer: '可以从 iPhone 向电脑发送文字，在同一 Wi-Fi 下还能接收照片。与 iPhone 在同一 Wi-Fi 时直接发送，不经过服务器。否则内容会在本页加密后经中继服务器传送，服务器上只保留加密内容，iPhone 收到后即删除。图片会在发送前缩小（宽 1600px）。',
+      relay: '（中继: {name}）', browser: '浏览器',
+      busyPhone: '已阻止另一台 iPhone 连接（一次只能连接一台设备）', busyPad: '已阻止另一台 iPad 连接（一次只能连接一台设备）',
+      gotPhone: 'iPhone 已取走 {n} 项', gotPad: 'iPad 已取走 {n} 项',
+      untilToday: '今天 {time}', untilTomorrow: '明天 {time}',
+      noteTrust: '信任此电脑 · 保持到断开为止。下次打开此页面会直接继续。',
+      noteDay: '今天 · 保持到 {until}。关闭窗口后重新打开也会继续。',
+      note1h: '1 小时 · 没有收发时 1 小时后结束。',
+      stop1h: '结束连接', stopSaved: '断开（同时删除保存的连接）',
+      sendErr: '发送失败（{status}）', qrFail: '无法加载二维码。请输入代码。',
+      endDefault: '连接已结束。这台电脑上不会留下任何内容。可以关闭窗口。',
+      endDay: '已超过一天，连接已结束。这台电脑上不会留下任何内容。',
+      endIdle: '1 小时内没有收发，连接已结束。这台电脑上不会留下任何内容。',
+      endPhone: 'iPhone 已结束连接。这台电脑上不会留下任何内容。可以关闭窗口。',
+      endSelf: '已结束连接。这台电脑上不会留下任何内容。可以关闭窗口。',
+      limit: 'iPhone 今天经服务器可接收的 {max} 张图片已用完。在 iPhone 上观看广告可以继续接收；与 iPhone 在同一 Wi-Fi 时可不经服务器直接发送。',
+      directOn: '<b>同一 Wi-Fi · 不经服务器直接</b>收发。可以从 iPhone 接收文字和照片。',
+      directTrying: '正在确认是否在同一 Wi-Fi…（不行则经服务器发送）',
+      directOff: '<b>经服务器</b>收发（加密）。只能从 iPhone 接收文字。在同一 Wi-Fi 时会自动直接连接，也能接收照片。',
+      directLog: '已通过同一 Wi-Fi 直接连接（不经服务器）',
+      toastImg: '收到来自 iPhone 的照片', toastTextCopied: '收到来自 iPhone 的文字，已复制', toastText: '收到来自 iPhone 的文字',
+      inboxEmpty: '在 iPhone 的 Pinshot 中通过 <b>电脑连接 &gt; 发送</b>（PC Connection &gt; Send）发送的文字会显示在这里。',
+      inboxEmptyPhotos: '在 iPhone 的 Pinshot 中通过 <b>电脑连接 &gt; 发送</b>（PC Connection &gt; Send）发送的文字和照片会显示在这里。',
+      photo: '照片', chars: '{n} 字', viaDirect: ' · 同一 Wi-Fi 直连', viaServer: ' · 经服务器',
+      copy: '复制', copied: '已复制', copyFail: '无法复制。请选中文字后复制。',
+      copyImage: '复制图片', copyImageFail: '此浏览器无法复制图片。请使用［保存］。',
+      save: '保存', saved: '已保存', del: '删除', placeholder: '输入要发送的文字', remove: '移除',
+      tooBig: '图片太大（最大 20MB）。', tooBigShrunk: '缩小后仍有 {size}，无法发送（最大 5MB）。',
+      pasted: '粘贴的图片', sendFail: '发送失败。请检查网络连接。',
+      sentLog: '已发送 {n} 项', sentAllDirect: '（不经服务器直接发送）', sentSomeDirect: '（其中 {n} 项不经服务器直接发送）',
+      unavailable: '不可用', noCrypto: '此浏览器无法使用加密功能。'
     }
   };
   var LANG_STORE = 'pinshotLang';
@@ -267,13 +362,15 @@
   // 시각 표기도 화면 언어로 (영어면 브라우저의 영어 지역 형식, 없으면 en-US)
   function timeLocale() {
     if (LANG === 'ko') return 'ko-KR';
+    if (LANG === 'ja') return 'ja-JP';
+    if (LANG === 'zh') return 'zh-CN';
     var list = navigator.languages || [];
     for (var i = 0; i < list.length; i++) if (/^en/i.test(list[i])) return list[i];
     return 'en-US';
   }
   function clock(d) { return d.toLocaleTimeString(timeLocale(), { hour: 'numeric', minute: '2-digit' }); }
   function applyStatic() {
-    document.documentElement.lang = LANG;
+    document.documentElement.lang = LANG === 'zh' ? 'zh-Hans' : LANG;
     Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) { el.textContent = t(el.dataset.i18n); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-html]'), function (el) { el.innerHTML = t(el.dataset.i18nHtml); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-aria]'), function (el) { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
