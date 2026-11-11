@@ -43,6 +43,21 @@
   .locked .pic { font-size: 14px; }
   .pempty { border: 1.5px dashed var(--line); border-radius: 12px; padding: 26px 14px; text-align: center; font-size: 14px; color: var(--ink2); }
   .err { color: var(--bad); font-size: 14px; }
+  .it { cursor: pointer; }
+  .it:hover { border-color: var(--accent); }
+  dialog { border: 1px solid var(--line); border-radius: 16px; padding: 0; background: var(--card); color: var(--ink); width: min(640px, 94vw); max-height: 90vh; }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  .dlg { display: flex; flex-direction: column; max-height: 90vh; }
+  .dlg .dh { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .dlg .dh b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dlg .db { padding: 16px 18px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+  .dlg .full { white-space: pre-wrap; word-break: break-word; font-size: 15px; background: #fff6b8; color: #1b2030; border-radius: 10px; padding: 14px; }
+  .dlg img { max-width: 100%; border-radius: 10px; display: block; margin: 0 auto; }
+  .dlg .sub { font-size: 13px; color: var(--ink2); }
+  .dlg .db > div > img + img { margin-top: 0; }
+  .unlock { display: flex; flex-direction: column; gap: 10px; }
+  .unlock input { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+  .unlock button { align-self: flex-start; }
   .who { font-size: 13px; color: var(--ink2); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 </style>
 </head>
@@ -79,6 +94,10 @@
   </section>
   <div class="err" id="err" hidden></div>
 </main>
+<dialog id="dlg"><div class="dlg">
+  <div class="dh"><b id="dtitle"></b><button class="plain" id="dclose" type="button" data-i18n="close">닫기</button></div>
+  <div class="db" id="dbody"></div>
+</div></dialog>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
@@ -87,6 +106,8 @@
   var SCOPE = 'https://www.googleapis.com/auth/drive.file';
   var API = 'https://www.googleapis.com/drive/v3/files';
   var LANG_STORE = 'pinshotLang';
+  var TOKEN_STORE = 'pinshotDriveToken';
+  function dropToken() { token = null; try { sessionStorage.removeItem(TOKEN_STORE); } catch (e) {} }
 
   var I18N = {
     ko: {
@@ -96,7 +117,7 @@
       reload: '새로 고침', logout: '로그아웃', tabMemo: '메모', tabNote: '노트', search: '검색',
       count: '{n}개', synced: '아이폰에서 올린 때: {t}', locked: '잠긴 항목', loading: '불러오는 중…',
       noSync: '드라이브에 동기화 목록이 없습니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "PC와 동기화"를 켜 주세요. 켰는데도 안 보이면 앱과 같은 구글 계정인지 확인해 주세요.',
-      empty: '항목이 없습니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}'
+      empty: '항목이 없습니다.', close: '닫기', askPassword: '잠긴 항목입니다. 아이폰에서 정한 PC 잠금 암호(백업 암호)를 넣어 주세요.', password: '암호', open: '열기', wrongPassword: '암호가 맞지 않습니다.', created: '만든 때', updated: '고친 때', lockedNote: '잠긴 항목입니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "잠긴 항목도 PC에서 열기"를 켜면 여기서 암호로 열 수 있습니다.', thumbNote: 'PC에는 작은 미리보기만 올라옵니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}'
     },
     en: {
       title: 'Pinshot My List', navSend: 'Send & Receive', navList: 'My List',
@@ -105,7 +126,7 @@
       reload: 'Refresh', logout: 'Sign Out', tabMemo: 'Memos', tabNote: 'Notes', search: 'Search',
       count: '{n} items', synced: 'Uploaded from iPhone: {t}', locked: 'Locked Item', loading: 'Loading…',
       noSync: 'No synced list found in Drive. Turn on "Sync with PC" in Pinshot on your iPhone (Settings > Backup > Google Drive). If it is on, check that you signed in with the same Google account as the app.',
-      empty: 'No items.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}'
+      empty: 'No items.', close: 'Close', askPassword: 'This item is locked. Enter the PC lock password (backup password) you set on your iPhone.', password: 'Password', open: 'Open', wrongPassword: 'Incorrect password.', created: 'Created', updated: 'Edited', lockedNote: 'This item is locked. Turn on "Open Locked Items on PC Too" in Pinshot on your iPhone (Settings > Backup > Google Drive) to open it here with a password.', thumbNote: 'Only a small preview is uploaded for PC.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}'
     },
     ja: {
       title: 'Pinshot マイリスト', navSend: '送受信', navList: 'マイリスト',
@@ -114,7 +135,7 @@
       reload: '再読み込み', logout: 'ログアウト', tabMemo: 'メモ', tabNote: 'ノート', search: '検索',
       count: '{n}件', synced: 'iPhone からのアップロード: {t}', locked: 'ロックされた項目', loading: '読み込み中…',
       noSync: 'ドライブに同期一覧がありません。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「PCと同期」をオンにしてください。オンでも表示されない場合は、アプリと同じ Google アカウントか確認してください。',
-      empty: '項目がありません。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}'
+      empty: '項目がありません。', close: '閉じる', askPassword: 'ロックされた項目です。iPhone で設定した PC ロック用パスワード（バックアップのパスワード）を入力してください。', password: 'パスワード', open: '開く', wrongPassword: 'パスワードが違います。', created: '作成', updated: '編集', lockedNote: 'ロックされた項目です。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「ロックした項目もPCで開く」をオンにすると、ここでパスワードで開けます。', thumbNote: 'PC には小さなプレビューのみアップロードされます。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}'
     },
     zh: {
       title: 'Pinshot 我的列表', navSend: '互传', navList: '我的列表',
@@ -123,7 +144,7 @@
       reload: '刷新', logout: '退出登录', tabMemo: '备忘', tabNote: '笔记', search: '搜索',
       count: '{n} 项', synced: '从 iPhone 上传于：{t}', locked: '已锁定的项目', loading: '正在加载…',
       noSync: '云端硬盘中没有同步列表。请在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“与电脑同步”。如果已打开仍看不到，请确认登录的是与 App 相同的 Google 账号。',
-      empty: '没有项目。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}'
+      empty: '没有项目。', close: '关闭', askPassword: '此项目已锁定。请输入在 iPhone 上设置的电脑锁定密码（备份密码）。', password: '密码', open: '打开', wrongPassword: '密码不正确。', created: '创建于', updated: '编辑于', lockedNote: '此项目已锁定。在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“在电脑上也能打开锁定项目”后，即可在这里用密码打开。', thumbNote: '电脑端只上传小预览图。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}'
     }
   };
   var HTML_LANG = { ko: 'ko', en: 'en', ja: 'ja', zh: 'zh-Hans' };
@@ -172,6 +193,8 @@
       callback: function (r) {
         if (r.error) { showError(t('failed', { e: r.error })); return; }
         token = r.access_token;
+        // 같은 탭에서 주고받기 ↔ 내 목록을 오가도 다시 로그인하지 않도록 (탭을 닫으면 지워진다)
+        try { sessionStorage.setItem(TOKEN_STORE, JSON.stringify({ t: token, exp: Date.now() + ((r.expires_in || 3600) - 60) * 1000 })); } catch (e) {}
         load();
       }
     });
@@ -184,7 +207,7 @@
   });
   $('logout').addEventListener('click', function () {
     if (token && window.google) google.accounts.oauth2.revoke(token, function () {});
-    token = null; data = null;
+    dropToken(); data = null;
     Object.keys(thumbURLs).forEach(function (k) { URL.revokeObjectURL(thumbURLs[k]); });
     thumbURLs = {};
     $('app').hidden = true; $('signin').hidden = false;
@@ -193,7 +216,7 @@
 
   function api(url) {
     return fetch(url, { headers: { Authorization: 'Bearer ' + token } }).then(function (r) {
-      if (r.status === 401) { token = null; $('app').hidden = true; $('signin').hidden = false; throw new Error('401'); }
+      if (r.status === 401) { dropToken(); $('app').hidden = true; $('signin').hidden = false; throw new Error('401'); }
       if (!r.ok) throw new Error(String(r.status));
       return r;
     });
@@ -288,8 +311,116 @@
     var sub = document.createElement('div'); sub.className = 'sub';
     sub.textContent = fmt(it.createdAt) + ((it.tags && it.tags.length) ? ' · #' + it.tags.join(' #') : '');
     meta.appendChild(tt); meta.appendChild(sub); el.appendChild(meta);
+    el.tabIndex = 0;
+    el.onclick = function () { openDetail(it); };
+    el.onkeydown = function (e) { if (e.key === 'Enter') openDetail(it); };
     return el;
   }
+
+  // 잠긴 항목: 아이폰에서 정한 PC 잠금 암호(백업 암호)로 브라우저 안에서 푼다. 키는 이 창의 메모리에만 둔다.
+  var lockKey = null, lockTimer = null, shown = null;
+  // 앱과 같게: 암호를 맞히고 10분이 지나면 다시 잠근다 (열려 있던 잠긴 항목 창도 닫는다)
+  var RELOCK_MS = 10 * 60 * 1000;
+  function relock() {
+    lockKey = null; clearTimeout(lockTimer); lockTimer = null;
+    if (shown && shown.locked && $('dlg').open) $('dlg').close();
+  }
+  function b64(str) { var bin = atob(str), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+  function openBytes(bytes) {
+    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, lockKey, bytes.slice(12));
+  }
+  function unlock(password) {
+    var lock = data && data.lock;
+    return crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey'])
+      .then(function (base) {
+        return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(lock.salt), iterations: lock.rounds, hash: 'SHA-256' },
+          base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+      })
+      .then(function (key) {
+        var before = lockKey; lockKey = key;
+        return openBytes(b64(lock.check)).then(function (plain) {
+          if (new TextDecoder().decode(plain) !== 'pinshot') throw new Error('bad');
+          clearTimeout(lockTimer); lockTimer = setTimeout(relock, RELOCK_MS);
+        }).catch(function () { lockKey = before; throw new Error('bad'); });
+      });
+  }
+
+  function showImages(it, body, secret) {
+    var ids = it.images || [];
+    if (!ids.length) {
+      var box = document.createElement('div');
+      if (it.thumb && !secret) loadThumb(it.thumb, box);
+      body.appendChild(box);
+      return;
+    }
+    var wait = document.createElement('div'); wait.className = 'sub'; wait.textContent = t('loading'); body.appendChild(wait);
+    var boxes = ids.map(function () { var d = document.createElement('div'); body.insertBefore(d, wait); return d; });
+    var left = ids.length;
+    ids.forEach(function (id, i) {
+      // 원본은 상세 보기를 열 때만 드라이브에서 받는다
+      api(API + '/' + id + '?alt=media').then(function (r) { return r.arrayBuffer(); })
+        .then(function (buf) { return secret ? openBytes(new Uint8Array(buf)) : buf; })
+        .then(function (buf) { put(boxes[i], URL.createObjectURL(new Blob([buf]))); })
+        .catch(function () {})
+        .then(function () { if (--left === 0) wait.remove(); });
+    });
+  }
+
+  function openDetail(it) {
+    shown = it;
+    $('dtitle').textContent = (it.favorite ? '★ ' : '') + (it.title || '');
+    var body = $('dbody'); body.innerHTML = '';
+    if (it.locked) {
+      if (!it.enc || !data.lock) {
+        var p = document.createElement('p'); p.textContent = '🔒 ' + t('lockedNote'); body.appendChild(p);
+      } else if (!lockKey) {
+        askPassword(it, body);
+      } else {
+        openBytes(b64(it.enc)).then(function (plain) {
+          var secret = JSON.parse(new TextDecoder().decode(plain));
+          detailBody(it, body, secret.text, secret.tags, true);
+        }).catch(function () { lockKey = null; openDetail(it); });
+      }
+    } else {
+      detailBody(it, body, it.text, it.tags, false);
+    }
+    if (!$('dlg').open) $('dlg').showModal();
+  }
+
+  function detailBody(it, body, text, tags, secret) {
+    body.innerHTML = '';
+    if (it.kind === 'memo') {
+      var m = document.createElement('div'); m.className = 'full'; m.textContent = text || ''; body.appendChild(m);
+    } else {
+      showImages(it, body, secret);
+    }
+    var info = document.createElement('div'); info.className = 'sub';
+    info.textContent = t('created') + ' ' + fmt(it.createdAt) + ' · ' + t('updated') + ' ' + fmt(it.updatedAt) +
+      ((tags && tags.length) ? ' · #' + tags.join(' #') : '');
+    body.appendChild(info);
+  }
+
+  function askPassword(it, body) {
+    var form = document.createElement('form'); form.className = 'unlock';
+    var p = document.createElement('p'); p.textContent = '🔒 ' + t('askPassword');
+    var input = document.createElement('input'); input.type = 'password'; input.autocomplete = 'current-password';
+    input.placeholder = t('password');
+    var go = document.createElement('button'); go.type = 'submit'; go.textContent = t('open');
+    var err = document.createElement('div'); err.className = 'err';
+    form.appendChild(p); form.appendChild(input); form.appendChild(go); form.appendChild(err);
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      if (!input.value) return;
+      go.disabled = true; err.textContent = '';
+      unlock(input.value).then(function () { openDetail(it); })
+        .catch(function () { go.disabled = false; err.textContent = t('wrongPassword'); input.select(); });
+    };
+    body.appendChild(form);
+    setTimeout(function () { input.focus(); }, 50);
+  }
+  $('dclose').addEventListener('click', function () { $('dlg').close(); });
+  $('logout').addEventListener('click', function () { relock(); });
+  $('dlg').addEventListener('click', function (e) { if (e.target === $('dlg')) $('dlg').close(); });
 
   // 썸네일은 화면에 보일 때만 받는다
   var watcher = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
@@ -312,6 +443,10 @@
   function put(box, url) { box.innerHTML = ''; var img = document.createElement('img'); img.src = url; img.alt = ''; box.appendChild(img); }
 
   applyLang();
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(TOKEN_STORE) || 'null');
+    if (saved && saved.t && saved.exp > Date.now()) { token = saved.t; load(); }
+  } catch (e) {}
 })();
 </script>
 </body>
