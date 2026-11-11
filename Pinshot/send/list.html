@@ -258,7 +258,7 @@
   });
 
   var $ = function (id) { return document.getElementById(id); };
-  var token = null, client = null, data = null, tab = 'memo', tag = null;
+  var token = null, client = null, data = null, tab = 'memo', picked = [];   // 고른 태그 (여러 개면 모두 붙은 항목만, 앱과 같게)
   // 그룹 줄: 탭마다 따로 (null = 전체, '\u0001fav' = 즐겨찾기)
   var FAV = '\u0001fav', groupSel = { memo: null, note: null };
   function groupNames() {
@@ -460,7 +460,7 @@
 
   document.querySelector('#app .ptabs').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b || !b.dataset.tab) return;
-    tab = b.dataset.tab; tag = null;
+    tab = b.dataset.tab; picked = [];
     document.querySelectorAll('#app .ptabs button[data-tab]').forEach(function (x) { x.classList.toggle('on', x === b); });
     render();
   });
@@ -483,7 +483,7 @@
     [[null, t('all')], [FAV, '★ ' + t('favorites')]].concat(gnames.map(function (g) { return [g, g]; })).forEach(function (pair) {
       var b = document.createElement('button'); b.type = 'button'; b.textContent = pair[1];
       b.className = pair[0] === gsel ? 'on' : '';
-      b.onclick = function () { groupSel[tab] = pair[0] === gsel ? null : pair[0]; tag = null; render(); };
+      b.onclick = function () { groupSel[tab] = pair[0] === gsel ? null : pair[0]; render(); };
       gbox.appendChild(b);
     });
     var all = inTab.filter(function (it) { return !gsel || (gsel === FAV ? it.favorite : it.group === gsel); });
@@ -491,21 +491,22 @@
     var tags = {};
     all.forEach(function (it) { (it.tags || []).forEach(function (g) { tags[g] = 1; }); });
     var names = Object.keys(tags).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
-    if (tag && !tags[tag]) tag = null;
+    picked = picked.filter(function (g) { return tags[g]; });
     var tbox = $('tags'); tbox.innerHTML = '';
     if (names.length) {
       names.forEach(function (g) {
         var b = document.createElement('button'); b.type = 'button';
         b.textContent = '#' + g;
-        b.className = g === tag ? 'on' : '';
-        b.onclick = function () { tag = tag === g ? null : g; render(); };
+        var on = picked.indexOf(g) >= 0;
+        b.className = on ? 'on' : '';
+        b.onclick = function () { picked = on ? picked.filter(function (x) { return x !== g; }) : picked.concat([g]); render(); };
         tbox.appendChild(b);
       });
     }
     // 거르기
     var q = $('q').value.trim().toLowerCase();
     var list = all.filter(function (it) {
-      if (tag && (it.tags || []).indexOf(tag) < 0) return false;
+      if (picked.some(function (g) { return (it.tags || []).indexOf(g) < 0; })) return false;
       if (!q) return true;
       return (it.title + ' ' + (it.text || '') + ' ' + (it.tags || []).join(' ')).toLowerCase().indexOf(q) >= 0;
     });
