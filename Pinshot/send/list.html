@@ -508,10 +508,9 @@
     var gnames = groupNames(), gsel = groupSel[tab];
     if (gsel && gsel !== FAV && gnames.indexOf(gsel) < 0) gsel = groupSel[tab] = null;
     var gbox = $('groups'); gbox.innerHTML = '';
-    [[null, t('all')], [FAV, '★']].concat(gnames.map(function (g) { return [g, g]; })).forEach(function (pair) {
+    [[null, t('all')], [FAV, '★ ' + t('favorites')]].concat(gnames.map(function (g) { return [g, g]; })).forEach(function (pair) {
       var b = document.createElement('button'); b.type = 'button'; b.textContent = pair[1];
       b.className = pair[0] === gsel ? 'on' : '';
-      if (pair[0] === FAV) { b.title = t('favorites'); b.setAttribute('aria-label', t('favorites')); }
       b.onclick = function () { groupSel[tab] = pair[0] === gsel ? null : pair[0]; render(); };
       gbox.appendChild(b);
     });
