@@ -240,17 +240,32 @@
       .then(function (j) { return j.files && j.files[0] ? j.files[0].id : null; });
   }
 
+  // 주고받기 탭에 갔다 와도 바로 보이게, 받은 목록을 이 브라우저 탭에만 기억한다 (탭을 닫으면 지워짐)
+  var LIST_STORE = 'pinshotListCache';
+  function remember() {
+    try { sessionStorage.setItem(LIST_STORE, JSON.stringify({ data: data, edits: edits, syncID: syncID, editsID: editsID })); } catch (e) {}
+  }
+  function forget() { try { sessionStorage.removeItem(LIST_STORE); } catch (e) {} }
+
   function load() {
     $('signin').hidden = true; $('app').hidden = false;
-    $('grid').innerHTML = ''; $('empty').hidden = false; $('empty').textContent = t('loading');
     showError('');
+    var cached = null;
+    if (!data) { try { cached = JSON.parse(sessionStorage.getItem(LIST_STORE) || 'null'); } catch (e) {} }
+    if (cached && cached.data) {
+      // 기억해 둔 목록을 먼저 그리고, 최신 목록은 뒤에서 확인한다
+      data = cached.data; edits = cached.edits || []; syncID = cached.syncID; editsID = cached.editsID;
+      render();
+    } else if (!data) {
+      $('grid').innerHTML = ''; $('empty').hidden = false; $('empty').textContent = t('loading');
+    }
     find('Pinshot', null, true)
       .then(function (root) { return root ? find('sync', root, true) : null; })
       .then(function (sync) { syncID = sync; return sync ? loadEdits().then(function () { return find('items.json', sync, false); }) : null; })
       .then(function (id) {
-        if (!id) { data = null; $('empty').textContent = t('noSync'); $('tags').innerHTML = ''; $('count').textContent = ''; $('synced').textContent = ''; return; }
+        if (!id) { forget(); data = null; $('grid').innerHTML = ''; $('empty').textContent = t('noSync'); $('tags').innerHTML = ''; $('count').textContent = ''; $('synced').textContent = ''; return; }
         return api(API + '/' + id + '?alt=media').then(function (r) { return r.json(); }).then(function (j) {
-          data = j; render();
+          data = j; render(); remember();
         });
       })
       .catch(function (e) { if (e.message !== '401') { $('empty').hidden = true; showError(t('failed', { e: e.message })); } });
@@ -296,7 +311,7 @@
       if (r.status === 401) { dropToken(); $('app').hidden = true; $('signin').hidden = false; throw new Error('401'); }
       if (!r.ok) throw new Error(String(r.status));
       return r.json();
-    }).then(function (j) { editsID = j.id || editsID; });
+    }).then(function (j) { editsID = j.id || editsID; remember(); });
   }
   function now() { return new Date().toISOString().replace(/\.\d+Z$/, 'Z'); }
   function newID() {
@@ -557,7 +572,7 @@
     setTimeout(function () { input.focus(); }, 50);
   }
   $('dclose').addEventListener('click', function () { $('dlg').close(); });
-  $('logout').addEventListener('click', function () { relock(); });
+  $('logout').addEventListener('click', function () { relock(); forget(); data = null; edits = []; });
   $('dlg').addEventListener('click', function (e) { if (e.target === $('dlg')) $('dlg').close(); });
 
   // 썸네일은 화면에 보일 때만 받는다
