@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title data-i18n="title">Pinshot 내 목록</title>
+<style>
+  :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --accent: #007aff; --ok: #34c759; --bad: #d64545; --star: #f5b400; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --accent: #4c8dff; --bad: #ff6b6b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; line-height: 1.55; padding: 32px 16px 48px; }
+  main { max-width: 960px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  h1 { font-size: 22px; margin: 0; }
+  p { margin: 0; color: var(--ink2); font-size: 15px; }
+  button { font: inherit; font-size: 15px; font-weight: 600; padding: 10px 20px; border-radius: 10px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  button.plain { background: transparent; color: var(--accent); padding: 6px 0; font-weight: 500; }
+  [hidden] { display: none !important; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .lang { display: flex; gap: 2px; font-size: 13px; flex-wrap: wrap; }
+  :lang(ja) { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans JP", sans-serif; }
+  :lang(zh) { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
+  .lang button { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 6px; background: none; color: var(--ink2); }
+  .lang button.on { color: var(--ink); background: var(--bg); font-weight: 600; }
+  .ptabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+  .ptabs a, .ptabs button { font-size: 15px; font-weight: 600; text-decoration: none; background: none; color: var(--ink2); padding: 8px 14px 10px; border-radius: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .ptabs .on { color: var(--accent); border-bottom-color: var(--accent); }
+  .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .bar input[type=search] { flex: 1; min-width: 180px; font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+  .label { font-size: 13px; color: var(--ink2); }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tags button { font-size: 13px; font-weight: 500; padding: 3px 10px; border-radius: 14px; background: var(--bg); color: var(--ink2); border: 1px solid var(--line); }
+  .tags button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .it { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; background: var(--card); }
+  .it .pic { height: 150px; background: var(--bg); display: flex; align-items: center; justify-content: center; color: var(--ink2); font-size: 13px; }
+  .it .pic img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .it .memo { height: 150px; padding: 10px 12px; white-space: pre-wrap; word-break: break-word; font-size: 14px; overflow: hidden; background: #fff6b8; color: #1b2030; }
+  .it .meta { padding: 8px 12px 10px; }
+  .it .tt { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .it .tt .star { color: var(--star); margin-right: 4px; }
+  .it .sub { font-size: 12px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .locked .pic { font-size: 14px; }
+  .pempty { border: 1.5px dashed var(--line); border-radius: 12px; padding: 26px 14px; text-align: center; font-size: 14px; color: var(--ink2); }
+  .err { color: var(--bad); font-size: 14px; }
+  .who { font-size: 13px; color: var(--ink2); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <h1 data-i18n="title">Pinshot 내 목록</h1>
+    <div class="lang" id="lang" role="group" aria-label="Language"><button type="button" data-lang="ko" lang="ko">한국어</button><button type="button" data-lang="zh" lang="zh-Hans">中文</button><button type="button" data-lang="ja" lang="ja">日本語</button><button type="button" data-lang="en" lang="en">English</button></div>
+  </div>
+  <nav class="ptabs">
+    <a href="./" data-i18n="navSend">주고받기</a>
+    <a href="list.html" class="on" data-i18n="navList">내 목록</a>
+  </nav>
+
+  <section id="signin">
+    <p data-i18n-html="intro">아이폰 Pinshot의 설정 &gt; 백업 &gt; 구글 드라이브에서 <b>PC와 동기화</b>를 켜 두면, 같은 구글 계정으로 로그인해 여기서 목록을 볼 수 있습니다.</p>
+    <p style="margin-top:14px"><button id="login" type="button" data-i18n="login">구글 계정으로 로그인</button></p>
+    <p class="label" style="margin-top:10px" data-i18n="privacy">목록은 이 브라우저가 내 구글 드라이브에서 바로 읽습니다. Pinshot 서버를 거치지 않습니다.</p>
+  </section>
+
+  <section id="app" hidden>
+    <div class="who"><span id="synced"></span><button class="plain" id="reload" type="button" data-i18n="reload">새로 고침</button><button class="plain" id="logout" type="button" data-i18n="logout">로그아웃</button></div>
+    <div class="ptabs" role="tablist" style="margin-top:8px">
+      <button type="button" data-tab="memo" class="on" role="tab" data-i18n="tabMemo">메모</button>
+      <button type="button" data-tab="note" role="tab" data-i18n="tabNote">노트</button>
+    </div>
+    <div class="bar" style="margin-top:12px">
+      <input type="search" id="q" data-i18n-ph="search" placeholder="검색">
+      <span class="label" id="count"></span>
+    </div>
+    <div class="tags" id="tags" style="margin-top:10px"></div>
+    <div class="grid" id="grid" style="margin-top:12px"></div>
+    <div class="pempty" id="empty" hidden></div>
+  </section>
+  <div class="err" id="err" hidden></div>
+</main>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+(function () {
+  var CLIENT_ID = '752425249669-gc1v7i3c541bk9hhflen3kdt7dp6gjco.apps.googleusercontent.com';
+  var SCOPE = 'https://www.googleapis.com/auth/drive.file';
+  var API = 'https://www.googleapis.com/drive/v3/files';
+  var LANG_STORE = 'pinshotLang';
+
+  var I18N = {
+    ko: {
+      title: 'Pinshot 내 목록', navSend: '주고받기', navList: '내 목록',
+      intro: '아이폰 Pinshot의 설정 &gt; 백업 &gt; 구글 드라이브에서 <b>PC와 동기화</b>를 켜 두면, 같은 구글 계정으로 로그인해 여기서 목록을 볼 수 있습니다.',
+      login: '구글 계정으로 로그인', privacy: '목록은 이 브라우저가 내 구글 드라이브에서 바로 읽습니다. Pinshot 서버를 거치지 않습니다.',
+      reload: '새로 고침', logout: '로그아웃', tabMemo: '메모', tabNote: '노트', search: '검색',
+      count: '{n}개', synced: '아이폰에서 올린 때: {t}', locked: '잠긴 항목', loading: '불러오는 중…',
+      noSync: '드라이브에 동기화 목록이 없습니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "PC와 동기화"를 켜 주세요. 켰는데도 안 보이면 앱과 같은 구글 계정인지 확인해 주세요.',
+      empty: '항목이 없습니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}'
+    },
+    en: {
+      title: 'Pinshot My List', navSend: 'Send & Receive', navList: 'My List',
+      intro: 'Turn on <b>Sync with PC</b> in Pinshot on your iPhone (Settings &gt; Backup &gt; Google Drive), then sign in with the same Google account to see your list here.',
+      login: 'Sign in with Google', privacy: 'This browser reads the list straight from your Google Drive. Nothing goes through Pinshot servers.',
+      reload: 'Refresh', logout: 'Sign Out', tabMemo: 'Memos', tabNote: 'Notes', search: 'Search',
+      count: '{n} items', synced: 'Uploaded from iPhone: {t}', locked: 'Locked Item', loading: 'Loading…',
+      noSync: 'No synced list found in Drive. Turn on "Sync with PC" in Pinshot on your iPhone (Settings > Backup > Google Drive). If it is on, check that you signed in with the same Google account as the app.',
+      empty: 'No items.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}'
+    },
+    ja: {
+      title: 'Pinshot マイリスト', navSend: '送受信', navList: 'マイリスト',
+      intro: 'iPhone の Pinshot で 設定 &gt; バックアップ &gt; Google ドライブ の <b>PCと同期</b> をオンにすると、同じ Google アカウントでログインしてここで一覧を見られます。',
+      login: 'Google でログイン', privacy: '一覧はこのブラウザが Google ドライブから直接読み込みます。Pinshot のサーバーは経由しません。',
+      reload: '再読み込み', logout: 'ログアウト', tabMemo: 'メモ', tabNote: 'ノート', search: '検索',
+      count: '{n}件', synced: 'iPhone からのアップロード: {t}', locked: 'ロックされた項目', loading: '読み込み中…',
+      noSync: 'ドライブに同期一覧がありません。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「PCと同期」をオンにしてください。オンでも表示されない場合は、アプリと同じ Google アカウントか確認してください。',
+      empty: '項目がありません。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}'
+    },
+    zh: {
+      title: 'Pinshot 我的列表', navSend: '互传', navList: '我的列表',
+      intro: '在 iPhone 的 Pinshot 中打开 设置 &gt; 备份 &gt; Google 云端硬盘 里的<b>与电脑同步</b>，然后用同一个 Google 账号登录，即可在这里查看列表。',
+      login: '使用 Google 登录', privacy: '列表由此浏览器直接从你的 Google 云端硬盘读取，不经过 Pinshot 服务器。',
+      reload: '刷新', logout: '退出登录', tabMemo: '备忘', tabNote: '笔记', search: '搜索',
+      count: '{n} 项', synced: '从 iPhone 上传于：{t}', locked: '已锁定的项目', loading: '正在加载…',
+      noSync: '云端硬盘中没有同步列表。请在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“与电脑同步”。如果已打开仍看不到，请确认登录的是与 App 相同的 Google 账号。',
+      empty: '没有项目。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}'
+    }
+  };
+  var HTML_LANG = { ko: 'ko', en: 'en', ja: 'ja', zh: 'zh-Hans' };
+
+  function pickLang() {
+    try { var s = localStorage.getItem(LANG_STORE); if (s && I18N[s]) return s; } catch (e) {}
+    var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < list.length; i++) {
+      var c = (list[i] || '').toLowerCase().slice(0, 2);
+      if (I18N[c]) return c;
+    }
+    return 'en';
+  }
+  var LANG = pickLang();
+  function t(key, vars) {
+    var s = (I18N[LANG] && I18N[LANG][key]) || I18N.en[key] || key;
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.replace('{' + k + '}', vars[k]); });
+    return s;
+  }
+  function applyLang() {
+    document.documentElement.lang = HTML_LANG[LANG];
+    document.querySelectorAll('[data-i18n]').forEach(function (el) { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll('#lang button').forEach(function (b) { b.classList.toggle('on', b.dataset.lang === LANG); });
+    document.title = t('title');
+    if (data) render();
+  }
+  document.getElementById('lang').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    LANG = b.dataset.lang;
+    try { localStorage.setItem(LANG_STORE, LANG); } catch (err) {}
+    applyLang();
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var token = null, client = null, data = null, tab = 'memo', tag = null;
+  var thumbURLs = {};
+
+  function showError(msg) { $('err').textContent = msg; $('err').hidden = !msg; }
+
+  function initClient() {
+    if (client || !window.google || !google.accounts) return !!client;
+    client = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID, scope: SCOPE,
+      callback: function (r) {
+        if (r.error) { showError(t('failed', { e: r.error })); return; }
+        token = r.access_token;
+        load();
+      }
+    });
+    return true;
+  }
+  $('login').addEventListener('click', function () {
+    showError('');
+    if (!initClient()) { setTimeout(function () { $('login').click(); }, 300); return; }
+    client.requestAccessToken({ prompt: '' });
+  });
+  $('logout').addEventListener('click', function () {
+    if (token && window.google) google.accounts.oauth2.revoke(token, function () {});
+    token = null; data = null;
+    Object.keys(thumbURLs).forEach(function (k) { URL.revokeObjectURL(thumbURLs[k]); });
+    thumbURLs = {};
+    $('app').hidden = true; $('signin').hidden = false;
+  });
+  $('reload').addEventListener('click', function () { load(); });
+
+  function api(url) {
+    return fetch(url, { headers: { Authorization: 'Bearer ' + token } }).then(function (r) {
+      if (r.status === 401) { token = null; $('app').hidden = true; $('signin').hidden = false; throw new Error('401'); }
+      if (!r.ok) throw new Error(String(r.status));
+      return r;
+    });
+  }
+  function find(name, parent, folder) {
+    var q = "name = '" + name + "' and trashed = false and mimeType " + (folder ? '=' : '!=') + " 'application/vnd.google-apps.folder'";
+    if (parent) q += " and '" + parent + "' in parents";
+    return api(API + '?fields=files(id)&q=' + encodeURIComponent(q)).then(function (r) { return r.json(); })
+      .then(function (j) { return j.files && j.files[0] ? j.files[0].id : null; });
+  }
+
+  function load() {
+    $('signin').hidden = true; $('app').hidden = false;
+    $('grid').innerHTML = ''; $('empty').hidden = false; $('empty').textContent = t('loading');
+    showError('');
+    find('Pinshot', null, true)
+      .then(function (root) { return root ? find('sync', root, true) : null; })
+      .then(function (sync) { return sync ? find('items.json', sync, false) : null; })
+      .then(function (id) {
+        if (!id) { data = null; $('empty').textContent = t('noSync'); $('tags').innerHTML = ''; $('count').textContent = ''; $('synced').textContent = ''; return; }
+        return api(API + '/' + id + '?alt=media').then(function (r) { return r.json(); }).then(function (j) {
+          data = j; render();
+        });
+      })
+      .catch(function (e) { if (e.message !== '401') { $('empty').hidden = true; showError(t('failed', { e: e.message })); } });
+  }
+
+  function fmt(iso) {
+    var d = new Date(iso); if (isNaN(d)) return '';
+    return d.toLocaleString(HTML_LANG[LANG], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  document.querySelector('#app .ptabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    tab = b.dataset.tab; tag = null;
+    document.querySelectorAll('#app .ptabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    render();
+  });
+  $('q').addEventListener('input', function () { render(); });
+
+  function render() {
+    if (!data) return;
+    $('synced').textContent = t('synced', { t: fmt(data.updatedAt) });
+    var all = (data.items || []).filter(function (it) { return tab === 'note' ? it.note : !it.note; });
+    // 태그
+    var tags = {};
+    all.forEach(function (it) { (it.tags || []).forEach(function (g) { tags[g] = 1; }); });
+    var names = Object.keys(tags).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+    if (tag && !tags[tag]) tag = null;
+    var tbox = $('tags'); tbox.innerHTML = '';
+    if (names.length) {
+      [null].concat(names).forEach(function (g) {
+        var b = document.createElement('button'); b.type = 'button';
+        b.textContent = g === null ? t('all') : '#' + g;
+        b.className = g === tag ? 'on' : '';
+        b.onclick = function () { tag = g; render(); };
+        tbox.appendChild(b);
+      });
+    }
+    // 거르기
+    var q = $('q').value.trim().toLowerCase();
+    var list = all.filter(function (it) {
+      if (tag && (it.tags || []).indexOf(tag) < 0) return false;
+      if (!q) return true;
+      return (it.title + ' ' + (it.text || '') + ' ' + (it.tags || []).join(' ')).toLowerCase().indexOf(q) >= 0;
+    });
+    // 즐겨찾기 먼저, 그다음 최근 순 (앱과 같게)
+    list.sort(function (a, b) { return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || (b.createdAt > a.createdAt ? 1 : -1); });
+    $('count').textContent = t('count', { n: list.length });
+    var grid = $('grid'); grid.innerHTML = '';
+    $('empty').hidden = list.length > 0;
+    $('empty').textContent = all.length ? t('noMatch') : t('empty');
+    list.forEach(function (it) { grid.appendChild(card(it)); });
+  }
+
+  function card(it) {
+    var el = document.createElement('div'); el.className = 'it' + (it.locked ? ' locked' : '');
+    var top;
+    if (it.locked) {
+      top = document.createElement('div'); top.className = 'pic'; top.textContent = '🔒 ' + t('locked');
+    } else if (it.kind === 'memo') {
+      top = document.createElement('div'); top.className = 'memo'; top.textContent = it.text || '';
+    } else {
+      top = document.createElement('div'); top.className = 'pic';
+      if (it.thumb) loadThumb(it.thumb, top);
+    }
+    el.appendChild(top);
+    var meta = document.createElement('div'); meta.className = 'meta';
+    var tt = document.createElement('div'); tt.className = 'tt';
+    if (it.favorite) { var s = document.createElement('span'); s.className = 'star'; s.textContent = '★'; tt.appendChild(s); }
+    tt.appendChild(document.createTextNode(it.title || ''));
+    var sub = document.createElement('div'); sub.className = 'sub';
+    sub.textContent = fmt(it.createdAt) + ((it.tags && it.tags.length) ? ' · #' + it.tags.join(' #') : '');
+    meta.appendChild(tt); meta.appendChild(sub); el.appendChild(meta);
+    return el;
+  }
+
+  // 썸네일은 화면에 보일 때만 받는다
+  var watcher = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      watcher.unobserve(e.target);
+      fetchThumb(e.target.dataset.thumb, e.target);
+    });
+  }, { rootMargin: '300px' }) : null;
+  function loadThumb(id, box) {
+    if (thumbURLs[id]) return put(box, thumbURLs[id]);
+    box.dataset.thumb = id;
+    if (watcher) watcher.observe(box); else fetchThumb(id, box);
+  }
+  function fetchThumb(id, box) {
+    api(API + '/' + id + '?alt=media').then(function (r) { return r.blob(); }).then(function (b) {
+      thumbURLs[id] = URL.createObjectURL(b); put(box, thumbURLs[id]);
+    }).catch(function () {});
+  }
+  function put(box, url) { box.innerHTML = ''; var img = document.createElement('img'); img.src = url; img.alt = ''; box.appendChild(img); }
+
+  applyLang();
+})();
+</script>
+</body>
+</html>
