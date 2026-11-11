@@ -35,7 +35,12 @@
   .label { font-size: 13px; color: var(--ink2); }
   .tags { display: flex; gap: 6px; flex-wrap: wrap; }
   .tags button { font-size: 13px; font-weight: 500; padding: 3px 10px; border-radius: 14px; background: var(--bg); color: var(--ink2); border: 1px solid var(--line); }
-  .groups button { font-weight: 600; }
+  .tags.groups { display: inline-flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; align-self: flex-start; }
+  .tags.groups button { font-size: 14px; font-weight: 600; padding: 6px 14px; border: 0; border-right: 1px solid var(--line); border-radius: 0; background: var(--card); color: var(--ink); }
+  .tags.groups button:last-child { border-right: 0; }
+  .tags.groups button.on { background: var(--ink); color: var(--card); }
+  .tags:not(.groups) button { background: transparent; border-color: transparent; color: var(--ink2); padding: 2px 6px; }
+  .tags:not(.groups) button.on { background: transparent; border-color: var(--accent); color: var(--accent); font-weight: 600; }
   .ed select { font: inherit; font-size: 15px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
   .tags button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
@@ -146,7 +151,7 @@
       <span class="label" id="count"></span>
       <button type="button" id="add">+ 새 메모</button>
     </div>
-    <div class="tags groups" id="groups" style="margin-top:10px"></div>
+    <div><div class="tags groups" id="groups" style="margin-top:10px"></div></div>
     <div class="tags" id="tags" style="margin-top:8px"></div>
     <div class="grid" id="grid" style="margin-top:12px"></div>
     <div class="pempty" id="empty" hidden></div>
@@ -489,11 +494,11 @@
     if (tag && !tags[tag]) tag = null;
     var tbox = $('tags'); tbox.innerHTML = '';
     if (names.length) {
-      [null].concat(names).forEach(function (g) {
+      names.forEach(function (g) {
         var b = document.createElement('button'); b.type = 'button';
-        b.textContent = g === null ? t('all') : '#' + g;
+        b.textContent = '#' + g;
         b.className = g === tag ? 'on' : '';
-        b.onclick = function () { tag = g; render(); };
+        b.onclick = function () { tag = tag === g ? null : g; render(); };
         tbox.appendChild(b);
       });
     }
