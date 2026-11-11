@@ -61,7 +61,8 @@
   .it:hover { border-color: var(--accent); }
   dialog { border: 1px solid var(--line); border-radius: 16px; padding: 0; background: var(--card); color: var(--ink); width: min(640px, 94vw); max-height: 90vh; overflow: hidden; }
   .dlg .dh b { flex: 1; }
-  #dbig { display: flex; padding: 4px; }
+  #dbig, #dclose { display: flex; padding: 4px; }
+  #dclose svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
   #dbig[hidden], .zc[hidden] { display: none; }
   #dbig svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .zc { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); }
@@ -143,7 +144,7 @@
   <div class="dh"><b id="dtitle"></b>
     <span class="zc" id="zctl" hidden><button type="button" id="zout">−</button><span id="zpct">100%</span><button type="button" id="zin">+</button><button type="button" id="z1" data-i18n="actual">원본 크기</button></span>
     <button class="plain" id="dbig" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
-    <button class="plain" id="dclose" type="button" data-i18n="close">닫기</button></div>
+    <button class="plain" id="dclose" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="db" id="dbody"></div>
   <div class="df" id="dfoot"></div>
 </div></dialog>
@@ -220,6 +221,7 @@
     document.querySelectorAll('[data-i18n-html]').forEach(function (el) { el.innerHTML = t(el.dataset.i18nHtml); });
     document.querySelectorAll('[data-i18n-ph]').forEach(function (el) { el.placeholder = t(el.dataset.i18nPh); });
     $('add').textContent = t(tab === 'note' ? 'newNote' : 'newMemo');
+    $('dclose').title = t('close'); $('dclose').setAttribute('aria-label', t('close'));
     $('dbig').title = t('bigView'); $('dbig').setAttribute('aria-label', t('bigView'));
     $('vList').title = t('viewList'); $('vList').setAttribute('aria-label', t('viewList'));
     $('vCard').title = t('viewCard'); $('vCard').setAttribute('aria-label', t('viewCard'));
