@@ -58,6 +58,13 @@
   .unlock { display: flex; flex-direction: column; gap: 10px; }
   .unlock input { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
   .unlock button { align-self: flex-start; }
+  .ed { display: flex; flex-direction: column; gap: 10px; }
+  .ed input, .ed textarea { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+  .ed textarea { min-height: 220px; resize: vertical; }
+  .acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button.ghost { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
+  button.danger { background: transparent; color: var(--bad); border: 1px solid var(--line); margin-left: auto; }
+  .wait { color: var(--accent); }
   .who { font-size: 13px; color: var(--ink2); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 </style>
 </head>
@@ -79,7 +86,7 @@
   </section>
 
   <section id="app" hidden>
-    <div class="who"><span id="synced"></span><button class="plain" id="reload" type="button" data-i18n="reload">새로 고침</button><button class="plain" id="logout" type="button" data-i18n="logout">로그아웃</button></div>
+    <div class="who"><span id="synced"></span><button class="plain" id="reload" type="button" data-i18n="reload">앱 내용 가져오기</button><button class="plain" id="logout" type="button" data-i18n="logout">로그아웃</button></div>
     <div class="ptabs" role="tablist" style="margin-top:8px">
       <button type="button" data-tab="memo" class="on" role="tab" data-i18n="tabMemo">메모</button>
       <button type="button" data-tab="note" role="tab" data-i18n="tabNote">노트</button>
@@ -87,10 +94,12 @@
     <div class="bar" style="margin-top:12px">
       <input type="search" id="q" data-i18n-ph="search" placeholder="검색">
       <span class="label" id="count"></span>
+      <button type="button" id="add" data-i18n="newMemo">+ 새 메모</button>
     </div>
     <div class="tags" id="tags" style="margin-top:10px"></div>
     <div class="grid" id="grid" style="margin-top:12px"></div>
     <div class="pempty" id="empty" hidden></div>
+    <p class="sub" data-i18n="limits" style="margin-top:14px;font-size:13px"></p>
   </section>
   <div class="err" id="err" hidden></div>
 </main>
@@ -105,6 +114,7 @@
   var CLIENT_ID = '752425249669-gc1v7i3c541bk9hhflen3kdt7dp6gjco.apps.googleusercontent.com';
   var SCOPE = 'https://www.googleapis.com/auth/drive.file';
   var API = 'https://www.googleapis.com/drive/v3/files';
+  var UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
   var LANG_STORE = 'pinshotLang';
   var TOKEN_STORE = 'pinshotDriveToken';
   function dropToken() { token = null; try { sessionStorage.removeItem(TOKEN_STORE); } catch (e) {} }
@@ -114,37 +124,37 @@
       title: 'Pinshot 내 목록', navSend: '주고받기', navList: '내 목록',
       intro: '아이폰 Pinshot의 설정 &gt; 백업 &gt; 구글 드라이브에서 <b>PC와 동기화</b>를 켜 두면, 같은 구글 계정으로 로그인해 여기서 목록을 볼 수 있습니다.',
       login: '구글 계정으로 로그인', privacy: '목록은 이 브라우저가 내 구글 드라이브에서 바로 읽습니다. Pinshot 서버를 거치지 않습니다.',
-      reload: '새로 고침', logout: '로그아웃', tabMemo: '메모', tabNote: '노트', search: '검색',
+      reload: '앱 내용 가져오기', logout: '로그아웃', tabMemo: '메모', tabNote: '노트', search: '검색',
       count: '{n}개', synced: '아이폰에서 올린 때: {t}', locked: '잠긴 항목', loading: '불러오는 중…',
       noSync: '드라이브에 동기화 목록이 없습니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "PC와 동기화"를 켜 주세요. 켰는데도 안 보이면 앱과 같은 구글 계정인지 확인해 주세요.',
-      empty: '항목이 없습니다.', close: '닫기', askPassword: '잠긴 항목입니다. 아이폰에서 정한 PC 잠금 암호(백업 암호)를 넣어 주세요.', password: '암호', open: '열기', wrongPassword: '암호가 맞지 않습니다.', created: '만든 때', updated: '고친 때', lockedNote: '잠긴 항목입니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "잠긴 항목도 PC에서 열기"를 켜면 여기서 암호로 열 수 있습니다.', thumbNote: 'PC에는 작은 미리보기만 올라옵니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}'
+      empty: '항목이 없습니다.', close: '닫기', askPassword: '잠긴 항목입니다. 아이폰에서 정한 PC 잠금 암호(백업 암호)를 넣어 주세요.', password: '암호', open: '열기', wrongPassword: '암호가 맞지 않습니다.', created: '만든 때', updated: '고친 때', lockedNote: '잠긴 항목입니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "잠긴 항목도 PC에서 열기"를 켜면 여기서 암호로 열 수 있습니다.', thumbNote: 'PC에는 작은 미리보기만 올라옵니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}', limits: 'PC에서 고친 내용은 드라이브에 바로 저장되고, 아이폰에서 Pinshot을 열 때 반영됩니다. 고정(화면 위에 띄우기), 잠긴 항목 수정 · 삭제, 그림 추가, 즐겨찾기, 글 모양(크기 · 색) 바꾸기는 아이폰 앱에서 해 주세요.', newMemo: '+ 새 메모', edit: '수정', del: '삭제', save: '저장', cancel: '취소', titlePh: '이름 (비우면 첫 줄)', textPh: '내용', tagsPh: '태그 (쉼표로 나눔)', pending: '아이폰 반영 대기', delConfirm: '이 항목을 지울까요? 아이폰에서 앱을 열 때 지워지고, 잠깐 동안 되돌릴 수 있습니다.', saveFailed: '저장하지 못했습니다: {e}', newTitle: '새 메모', editNote: '아이폰에서 Pinshot을 열면 반영됩니다. 같은 항목을 아이폰에서 더 나중에 고쳤으면 아이폰 쪽이 남습니다.'
     },
     en: {
       title: 'Pinshot My List', navSend: 'Send & Receive', navList: 'My List',
       intro: 'Turn on <b>Sync with PC</b> in Pinshot on your iPhone (Settings &gt; Backup &gt; Google Drive), then sign in with the same Google account to see your list here.',
       login: 'Sign in with Google', privacy: 'This browser reads the list straight from your Google Drive. Nothing goes through Pinshot servers.',
-      reload: 'Refresh', logout: 'Sign Out', tabMemo: 'Memos', tabNote: 'Notes', search: 'Search',
+      reload: 'Get from App', logout: 'Sign Out', tabMemo: 'Memos', tabNote: 'Notes', search: 'Search',
       count: '{n} items', synced: 'Uploaded from iPhone: {t}', locked: 'Locked Item', loading: 'Loading…',
       noSync: 'No synced list found in Drive. Turn on "Sync with PC" in Pinshot on your iPhone (Settings > Backup > Google Drive). If it is on, check that you signed in with the same Google account as the app.',
-      empty: 'No items.', close: 'Close', askPassword: 'This item is locked. Enter the PC lock password (backup password) you set on your iPhone.', password: 'Password', open: 'Open', wrongPassword: 'Incorrect password.', created: 'Created', updated: 'Edited', lockedNote: 'This item is locked. Turn on "Open Locked Items on PC Too" in Pinshot on your iPhone (Settings > Backup > Google Drive) to open it here with a password.', thumbNote: 'Only a small preview is uploaded for PC.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}'
+      empty: 'No items.', close: 'Close', askPassword: 'This item is locked. Enter the PC lock password (backup password) you set on your iPhone.', password: 'Password', open: 'Open', wrongPassword: 'Incorrect password.', created: 'Created', updated: 'Edited', lockedNote: 'This item is locked. Turn on "Open Locked Items on PC Too" in Pinshot on your iPhone (Settings > Backup > Google Drive) to open it here with a password.', thumbNote: 'Only a small preview is uploaded for PC.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}', limits: 'Changes made on PC are saved to Drive right away and applied when you open Pinshot on your iPhone. Pinning (floating on screen), editing or deleting locked items, adding images, favorites, and changing text style (size, color) must be done in the iPhone app.', newMemo: '+ New Memo', edit: 'Edit', del: 'Delete', save: 'Save', cancel: 'Cancel', titlePh: 'Name (first line if empty)', textPh: 'Text', tagsPh: 'Tags (separate with commas)', pending: 'Waiting for iPhone', delConfirm: 'Delete this item? It will be deleted when you open the app on your iPhone, and you can undo it for a moment.', saveFailed: 'Couldn\'t save: {e}', newTitle: 'New Memo', editNote: 'Changes are applied when you open Pinshot on your iPhone. If the same item was edited later on your iPhone, the iPhone version is kept.'
     },
     ja: {
       title: 'Pinshot マイリスト', navSend: '送受信', navList: 'マイリスト',
       intro: 'iPhone の Pinshot で 設定 &gt; バックアップ &gt; Google ドライブ の <b>PCと同期</b> をオンにすると、同じ Google アカウントでログインしてここで一覧を見られます。',
       login: 'Google でログイン', privacy: '一覧はこのブラウザが Google ドライブから直接読み込みます。Pinshot のサーバーは経由しません。',
-      reload: '再読み込み', logout: 'ログアウト', tabMemo: 'メモ', tabNote: 'ノート', search: '検索',
+      reload: 'アプリから取り込む', logout: 'ログアウト', tabMemo: 'メモ', tabNote: 'ノート', search: '検索',
       count: '{n}件', synced: 'iPhone からのアップロード: {t}', locked: 'ロックされた項目', loading: '読み込み中…',
       noSync: 'ドライブに同期一覧がありません。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「PCと同期」をオンにしてください。オンでも表示されない場合は、アプリと同じ Google アカウントか確認してください。',
-      empty: '項目がありません。', close: '閉じる', askPassword: 'ロックされた項目です。iPhone で設定した PC ロック用パスワード（バックアップのパスワード）を入力してください。', password: 'パスワード', open: '開く', wrongPassword: 'パスワードが違います。', created: '作成', updated: '編集', lockedNote: 'ロックされた項目です。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「ロックした項目もPCで開く」をオンにすると、ここでパスワードで開けます。', thumbNote: 'PC には小さなプレビューのみアップロードされます。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}'
+      empty: '項目がありません。', close: '閉じる', askPassword: 'ロックされた項目です。iPhone で設定した PC ロック用パスワード（バックアップのパスワード）を入力してください。', password: 'パスワード', open: '開く', wrongPassword: 'パスワードが違います。', created: '作成', updated: '編集', lockedNote: 'ロックされた項目です。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「ロックした項目もPCで開く」をオンにすると、ここでパスワードで開けます。', thumbNote: 'PC には小さなプレビューのみアップロードされます。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}', limits: 'PC で変更した内容はすぐにドライブに保存され、iPhone で Pinshot を開いたときに反映されます。固定（画面に浮かべる）、ロックした項目の編集・削除、画像の追加、お気に入り、文字の見た目（サイズ・色）の変更は iPhone のアプリで行ってください。', newMemo: '+ 新規メモ', edit: '編集', del: '削除', save: '保存', cancel: 'キャンセル', titlePh: '名前（空なら1行目）', textPh: '内容', tagsPh: 'タグ（カンマで区切る）', pending: 'iPhone への反映待ち', delConfirm: 'この項目を削除しますか？ iPhone でアプリを開いたときに削除され、しばらくの間は取り消せます。', saveFailed: '保存できませんでした: {e}', newTitle: '新規メモ', editNote: 'iPhone で Pinshot を開くと反映されます。同じ項目を iPhone で後から編集した場合は iPhone 側が残ります。'
     },
     zh: {
       title: 'Pinshot 我的列表', navSend: '互传', navList: '我的列表',
       intro: '在 iPhone 的 Pinshot 中打开 设置 &gt; 备份 &gt; Google 云端硬盘 里的<b>与电脑同步</b>，然后用同一个 Google 账号登录，即可在这里查看列表。',
       login: '使用 Google 登录', privacy: '列表由此浏览器直接从你的 Google 云端硬盘读取，不经过 Pinshot 服务器。',
-      reload: '刷新', logout: '退出登录', tabMemo: '备忘', tabNote: '笔记', search: '搜索',
+      reload: '从应用获取', logout: '退出登录', tabMemo: '备忘', tabNote: '笔记', search: '搜索',
       count: '{n} 项', synced: '从 iPhone 上传于：{t}', locked: '已锁定的项目', loading: '正在加载…',
       noSync: '云端硬盘中没有同步列表。请在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“与电脑同步”。如果已打开仍看不到，请确认登录的是与 App 相同的 Google 账号。',
-      empty: '没有项目。', close: '关闭', askPassword: '此项目已锁定。请输入在 iPhone 上设置的电脑锁定密码（备份密码）。', password: '密码', open: '打开', wrongPassword: '密码不正确。', created: '创建于', updated: '编辑于', lockedNote: '此项目已锁定。在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“在电脑上也能打开锁定项目”后，即可在这里用密码打开。', thumbNote: '电脑端只上传小预览图。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}'
+      empty: '没有项目。', close: '关闭', askPassword: '此项目已锁定。请输入在 iPhone 上设置的电脑锁定密码（备份密码）。', password: '密码', open: '打开', wrongPassword: '密码不正确。', created: '创建于', updated: '编辑于', lockedNote: '此项目已锁定。在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“在电脑上也能打开锁定项目”后，即可在这里用密码打开。', thumbNote: '电脑端只上传小预览图。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}', limits: '在电脑上所做的更改会立即保存到云端硬盘，并在 iPhone 上打开 Pinshot 时生效。固定（悬浮在屏幕上）、编辑或删除锁定项目、添加图片、收藏以及更改文字样式（大小、颜色）请在 iPhone 应用中操作。', newMemo: '+ 新建备忘录', edit: '编辑', del: '删除', save: '保存', cancel: '取消', titlePh: '名称（留空则用第一行）', textPh: '内容', tagsPh: '标签（用逗号分隔）', pending: '等待同步到 iPhone', delConfirm: '要删除此项目吗？在 iPhone 上打开应用时会删除，并可在短时间内撤销。', saveFailed: '无法保存：{e}', newTitle: '新建备忘录', editNote: '在 iPhone 上打开 Pinshot 后生效。如果在 iPhone 上更晚编辑了同一项目，将保留 iPhone 上的版本。'
     }
   };
   var HTML_LANG = { ko: 'ko', en: 'en', ja: 'ja', zh: 'zh-Hans' };
@@ -182,6 +192,8 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var token = null, client = null, data = null, tab = 'memo', tag = null;
+  // 웹에서 고친 것 (edits-web.json). 아이폰 앱이 열릴 때 반영하고 비운다.
+  var syncID = null, editsID = null, edits = [];
   var thumbURLs = {};
 
   function showError(msg) { $('err').textContent = msg; $('err').hidden = !msg; }
@@ -234,7 +246,7 @@
     showError('');
     find('Pinshot', null, true)
       .then(function (root) { return root ? find('sync', root, true) : null; })
-      .then(function (sync) { return sync ? find('items.json', sync, false) : null; })
+      .then(function (sync) { syncID = sync; return sync ? loadEdits().then(function () { return find('items.json', sync, false); }) : null; })
       .then(function (id) {
         if (!id) { data = null; $('empty').textContent = t('noSync'); $('tags').innerHTML = ''; $('count').textContent = ''; $('synced').textContent = ''; return; }
         return api(API + '/' + id + '?alt=media').then(function (r) { return r.json(); }).then(function (j) {
@@ -243,6 +255,77 @@
       })
       .catch(function (e) { if (e.message !== '401') { $('empty').hidden = true; showError(t('failed', { e: e.message })); } });
   }
+
+  function loadEdits() {
+    return find('edits-web.json', syncID, false).then(function (id) {
+      editsID = id; edits = [];
+      if (!id) return;
+      return api(API + '/' + id + '?alt=media').then(function (r) { return r.json(); })
+        .then(function (j) { edits = (j && j.edits) || []; }).catch(function () { edits = []; });
+    });
+  }
+  // 고친 것을 하나 더한다: 파일을 다시 읽어(다른 창에서 고친 것 유지) 같은 항목의 이전 변경을 바꾼 뒤 저장
+  function addEdit(entry) {
+    return loadEdits().then(function () {
+      var prev = edits.filter(function (e) { return e.id === entry.id; })[0];
+      edits = edits.filter(function (e) { return e.id !== entry.id; });
+      if (prev && prev.op === 'add') {
+        // 아직 아이폰에 안 간 새 메모: 지우면 없던 일로, 고치면 새 메모 내용을 바꾼다
+        if (entry.op === 'delete') entry = null; else entry.op = 'add';
+        if (entry) entry.note = prev.note;
+      }
+      if (entry) edits.push(entry);
+      return saveEdits();
+    });
+  }
+  function saveEdits() {
+    var body = JSON.stringify({ edits: edits });
+    var head = { Authorization: 'Bearer ' + token };
+    var req;
+    if (editsID) {
+      head['Content-Type'] = 'application/json';
+      req = fetch(UPLOAD + '/' + editsID + '?uploadType=media&fields=id', { method: 'PATCH', headers: head, body: body });
+    } else {
+      var b = 'pinshot' + Date.now();
+      head['Content-Type'] = 'multipart/related; boundary=' + b;
+      var meta = JSON.stringify({ name: 'edits-web.json', parents: [syncID], mimeType: 'application/json' });
+      req = fetch(UPLOAD + '?uploadType=multipart&fields=id', { method: 'POST', headers: head,
+        body: '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + meta + '\r\n--' + b + '\r\nContent-Type: application/json\r\n\r\n' + body + '\r\n--' + b + '--' });
+    }
+    return req.then(function (r) {
+      if (r.status === 401) { dropToken(); $('app').hidden = true; $('signin').hidden = false; throw new Error('401'); }
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (j) { editsID = j.id || editsID; });
+  }
+  function now() { return new Date().toISOString().replace(/\.\d+Z$/, 'Z'); }
+  function newID() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID().toUpperCase();
+    return 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, function () { return (Math.random() * 16 | 0).toString(16); }).toUpperCase();
+  }
+  // items.json 위에 아직 반영 안 된 웹 변경을 겹친다 (아이폰이 더 나중에 고친 것은 그대로)
+  function merged() {
+    var byID = {};
+    edits.forEach(function (e) { byID[e.id] = e; });
+    var out = [];
+    (data.items || []).forEach(function (it) {
+      var e = byID[it.id];
+      if (!e || it.locked || !(e.updatedAt > (it.updatedAt || ''))) return out.push(it);
+      if (e.op === 'delete') return;
+      var copy = Object.assign({}, it, { pending: true });
+      if (e.title) copy.title = e.title;
+      if (e.tags) copy.tags = e.tags;
+      if (it.kind === 'memo' && e.text) copy.text = e.text;
+      out.push(copy);
+    });
+    edits.forEach(function (e) {
+      if (e.op !== 'add') return;
+      out.push({ id: e.id, kind: 'memo', title: e.title || firstLine(e.text), text: e.text, tags: e.tags, note: !!e.note,
+                 createdAt: e.updatedAt, updatedAt: e.updatedAt, pending: true, isNew: true });
+    });
+    return out;
+  }
+  function firstLine(text) { return ((text || '').split('\n')[0] || '').slice(0, 30); }
 
   function fmt(iso) {
     var d = new Date(iso); if (isNaN(d)) return '';
@@ -260,7 +343,7 @@
   function render() {
     if (!data) return;
     $('synced').textContent = t('synced', { t: fmt(data.updatedAt) });
-    var all = (data.items || []).filter(function (it) { return tab === 'note' ? it.note : !it.note; });
+    var all = merged().filter(function (it) { return tab === 'note' ? it.note : !it.note; });
     // 태그
     var tags = {};
     all.forEach(function (it) { (it.tags || []).forEach(function (g) { tags[g] = 1; }); });
@@ -309,7 +392,7 @@
     if (it.favorite) { var s = document.createElement('span'); s.className = 'star'; s.textContent = '★'; tt.appendChild(s); }
     tt.appendChild(document.createTextNode(it.title || ''));
     var sub = document.createElement('div'); sub.className = 'sub';
-    sub.textContent = fmt(it.createdAt) + ((it.tags && it.tags.length) ? ' · #' + it.tags.join(' #') : '');
+    sub.textContent = (it.pending ? '⏳ ' + t('pending') + ' · ' : '') + fmt(it.createdAt) + ((it.tags && it.tags.length) ? ' · #' + it.tags.join(' #') : '');
     meta.appendChild(tt); meta.appendChild(sub); el.appendChild(meta);
     el.tabIndex = 0;
     el.onclick = function () { openDetail(it); };
@@ -398,7 +481,62 @@
     info.textContent = t('created') + ' ' + fmt(it.createdAt) + ' · ' + t('updated') + ' ' + fmt(it.updatedAt) +
       ((tags && tags.length) ? ' · #' + tags.join(' #') : '');
     body.appendChild(info);
+    if (it.locked) return;
+    // 잠기지 않은 항목만 PC 에서 고치고 지운다. 그림 항목은 이름 · 태그만.
+    var acts = document.createElement('div'); acts.className = 'acts';
+    var edit = document.createElement('button'); edit.type = 'button'; edit.textContent = t('edit');
+    edit.onclick = function () { editForm(it); };
+    var del = document.createElement('button'); del.type = 'button'; del.className = 'danger'; del.textContent = t('del');
+    del.onclick = function () {
+      if (!confirm(t('delConfirm'))) return;
+      del.disabled = true;
+      addEdit({ id: it.id, op: 'delete', updatedAt: now() })
+        .then(function () { $('dlg').close(); render(); })
+        .catch(function (e) { del.disabled = false; if (e.message !== '401') alert(t('saveFailed', { e: e.message })); });
+    };
+    acts.appendChild(edit); acts.appendChild(del);
+    body.appendChild(acts);
   }
+
+  // 새 메모(it 없음) · 고치기
+  function editForm(it) {
+    shown = it || null;
+    $('dtitle').textContent = it ? it.title : t('newTitle');
+    var body = $('dbody'); body.innerHTML = '';
+    var form = document.createElement('form'); form.className = 'ed';
+    var title = document.createElement('input'); title.placeholder = t('titlePh'); title.value = !it ? '' : (it.isNew && it.title === firstLine(it.text)) ? '' : (it.title || '');
+    var text = null;
+    if (!it || it.kind === 'memo') {
+      text = document.createElement('textarea'); text.placeholder = t('textPh'); text.value = it ? (it.text || '') : '';
+    }
+    var tags = document.createElement('input'); tags.placeholder = t('tagsPh'); tags.value = it && it.tags ? it.tags.join(', ') : '';
+    var note = document.createElement('p'); note.className = 'sub'; note.textContent = t('editNote');
+    var acts = document.createElement('div'); acts.className = 'acts';
+    var save = document.createElement('button'); save.type = 'submit'; save.textContent = t('save');
+    var cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'ghost'; cancel.textContent = t('cancel');
+    cancel.onclick = function () { if (it) openDetail(it); else $('dlg').close(); };
+    var err = document.createElement('div'); err.className = 'err';
+    acts.appendChild(save); acts.appendChild(cancel);
+    form.appendChild(title); if (text) form.appendChild(text); form.appendChild(tags); form.appendChild(note); form.appendChild(acts); form.appendChild(err);
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      if (text && !text.value.trim()) { text.focus(); return; }
+      var list = tags.value.split(/[,，、]/).map(function (x) { return x.trim().replace(/^#/, ''); }).filter(Boolean);
+      var entry = { id: it ? it.id : newID(), op: it ? 'update' : 'add', title: title.value.trim(), tags: list, updatedAt: now() };
+      if (text) entry.text = text.value;
+      if (!it) entry.note = tab === 'note';
+      save.disabled = true; err.textContent = '';
+      addEdit(entry).then(function () {
+        render();
+        var fresh = merged().filter(function (x) { return x.id === entry.id; })[0];
+        if (fresh) openDetail(fresh); else $('dlg').close();
+      }).catch(function (e2) { save.disabled = false; if (e2.message !== '401') err.textContent = t('saveFailed', { e: e2.message }); });
+    };
+    body.appendChild(form);
+    if (!$('dlg').open) $('dlg').showModal();
+    setTimeout(function () { (text || title).focus(); }, 50);
+  }
+  $('add').addEventListener('click', function () { if (syncID) editForm(null); });
 
   function askPassword(it, body) {
     var form = document.createElement('form'); form.className = 'unlock';
