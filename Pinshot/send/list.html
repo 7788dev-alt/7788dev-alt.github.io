@@ -59,7 +59,9 @@
   .err { color: var(--bad); font-size: 14px; }
   .it { cursor: pointer; }
   .it:hover { border-color: var(--accent); }
-  dialog { border: 1px solid var(--line); border-radius: 16px; padding: 0; background: var(--card); color: var(--ink); width: min(640px, 94vw); max-height: 90vh; }
+  dialog { border: 1px solid var(--line); border-radius: 16px; padding: 0; background: var(--card); color: var(--ink); width: min(640px, 94vw); max-height: 90vh; overflow: hidden; }
+  .dlg .df { padding: 12px 18px; border-top: 1px solid var(--line); }
+  .dlg .df:empty { display: none; }
   dialog::backdrop { background: rgba(0,0,0,.55); }
   .dlg { display: flex; flex-direction: column; max-height: 90vh; }
   .dlg .dh { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
@@ -124,6 +126,7 @@
 <dialog id="dlg"><div class="dlg">
   <div class="dh"><b id="dtitle"></b><button class="plain" id="dclose" type="button" data-i18n="close">닫기</button></div>
   <div class="db" id="dbody"></div>
+  <div class="df" id="dfoot"></div>
 </div></dialog>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -506,7 +509,7 @@
   function openDetail(it) {
     shown = it;
     $('dtitle').textContent = (it.favorite ? '★ ' : '') + (it.title || '');
-    var body = $('dbody'); body.innerHTML = '';
+    var body = $('dbody'); body.innerHTML = ''; $('dfoot').innerHTML = '';
     if (it.locked) {
       if (!it.enc || !data.lock) {
         var p = document.createElement('p'); p.textContent = '🔒 ' + t('lockedNote'); body.appendChild(p);
@@ -525,7 +528,7 @@
   }
 
   function detailBody(it, body, text, tags, secret) {
-    body.innerHTML = '';
+    body.innerHTML = ''; $('dfoot').innerHTML = '';
     if (it.kind === 'memo') {
       var m = document.createElement('div'); m.className = 'full'; m.textContent = text || ''; body.appendChild(m);
     } else {
@@ -549,14 +552,14 @@
         .catch(function (e) { del.disabled = false; if (e.message !== '401') alert(t('saveFailed', { e: e.message })); });
     };
     acts.appendChild(edit); acts.appendChild(del);
-    body.appendChild(acts);
+    $('dfoot').appendChild(acts);
   }
 
   // 새 메모(it 없음) · 고치기
   function editForm(it) {
     shown = it || null;
     $('dtitle').textContent = it ? it.title : t(tab === 'note' ? 'newNoteTitle' : 'newTitle');
-    var body = $('dbody'); body.innerHTML = '';
+    var body = $('dbody'); body.innerHTML = ''; $('dfoot').innerHTML = '';
     var form = document.createElement('form'); form.className = 'ed';
     var title = document.createElement('input'); title.placeholder = t('titlePh'); title.value = !it ? '' : (it.isNew && it.title === firstLine(it.text)) ? '' : (it.title || '');
     var text = null;
@@ -573,7 +576,10 @@
     form.oninput = function () { dirty = true; };
     var err = document.createElement('div'); err.className = 'err';
     acts.appendChild(save); acts.appendChild(cancel);
-    form.appendChild(title); if (text) form.appendChild(text); form.appendChild(tags); form.appendChild(note); form.appendChild(acts); form.appendChild(err);
+    form.appendChild(title); if (text) form.appendChild(text); form.appendChild(tags); form.appendChild(note); form.appendChild(err);
+    // 저장 · 취소는 아래 고정 줄에 둔다 (form 속성으로 이 폼을 보낸다)
+    form.id = 'edform'; save.setAttribute('form', 'edform');
+    $('dfoot').appendChild(acts);
     form.onsubmit = function (e) {
       e.preventDefault();
       if (text && !text.value.trim()) { text.focus(); return; }
