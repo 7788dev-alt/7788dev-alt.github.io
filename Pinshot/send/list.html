@@ -564,7 +564,7 @@
     var list = all.filter(function (it) {
       if (picked.some(function (g) { return (it.tags || []).indexOf(g) < 0; })) return false;
       if (!q) return true;
-      return (it.title + ' ' + (it.text || '') + ' ' + (it.tags || []).join(' ')).toLowerCase().indexOf(q) >= 0;
+      return (it.title + ' ' + (it.text || '') + ' ' + (it.tags || []).join(' ') + ' ' + (secretText[it.id] || '')).toLowerCase().indexOf(q) >= 0;
     });
     // 즐겨찾기 먼저, 그다음 최근 순 (앱과 같게)
     list.sort(function (a, b) { return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || (b.createdAt > a.createdAt ? 1 : -1); });
@@ -611,11 +611,23 @@
 
   // 잠긴 항목: 아이폰에서 정한 PC 잠금 암호(백업 암호)로 브라우저 안에서 푼다. 키는 이 창의 메모리에만 둔다.
   var lockKey = null, lockTimer = null, shown = null;
+  // 암호를 맞힌 동안만 잠긴 항목의 글 · 태그도 검색에 넣는다 (다시 잠그면 지움)
+  var secretText = {};
+  function loadSecretText() {
+    if (!lockKey || !data) return;
+    var jobs = merged().filter(function (it) { return it.locked && it.enc; }).map(function (it) {
+      return openBytes(b64(it.enc)).then(function (plain) {
+        var sc = JSON.parse(new TextDecoder().decode(plain));
+        secretText[it.id] = (sc.text || '') + ' ' + (sc.tags || []).join(' ');
+      }).catch(function () {});
+    });
+    Promise.all(jobs).then(function () { if ($('q').value.trim()) render(); });
+  }
   // 앱과 같게: 암호를 맞히고 10분이 지나면 다시 잠근다 (열려 있던 잠긴 항목 창도 닫는다)
   var RELOCK_MS = 10 * 60 * 1000;
   function relock() {
     Object.keys(imageURLs).forEach(function (k) { URL.revokeObjectURL(imageURLs[k]); }); imageURLs = {};
-    lockKey = null; clearTimeout(lockTimer); lockTimer = null;
+    lockKey = null; clearTimeout(lockTimer); lockTimer = null; secretText = {}; render();
     if (shown && shown.locked && $('dlg').open) $('dlg').close();
   }
   function b64(str) { var bin = atob(str), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
@@ -634,6 +646,7 @@
         return openBytes(b64(lock.check)).then(function (plain) {
           if (new TextDecoder().decode(plain) !== 'pinshot') throw new Error('bad');
           clearTimeout(lockTimer); lockTimer = setTimeout(relock, RELOCK_MS);
+          loadSecretText();
         }).catch(function () { lockKey = before; throw new Error('bad'); });
       });
   }
