@@ -99,6 +99,7 @@
   .dlg .dh { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
   .dlg .dh b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dlg .db { padding: 16px 18px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+  .dlg .full mark { background: #ffb340; color: inherit; border-radius: 3px; }
   .dlg .full { white-space: pre-wrap; word-break: break-word; font-size: 15px; background: #fff6b8; color: #1b2030; border-radius: 10px; padding: 14px; }
   .dlg img { max-width: 100%; border-radius: 10px; display: block; margin: 0 auto; }
   .dlg .sub { font-size: 13px; color: var(--ink2); }
@@ -698,6 +699,21 @@
     if (!$('dlg').open) $('dlg').showModal();
   }
 
+  // 검색어를 칠하고 처음 찾은 곳까지 넘긴다 (앱과 같게)
+  function markText(box, text, q) {
+    var low = text.toLowerCase(), ql = q.toLowerCase(), at = 0, first = null;
+    while (ql) {
+      var i = low.indexOf(ql, at);
+      if (i < 0) break;
+      box.appendChild(document.createTextNode(text.slice(at, i)));
+      var mk = document.createElement('mark'); mk.textContent = text.slice(i, i + ql.length); box.appendChild(mk);
+      if (!first) first = mk;
+      at = i + ql.length;
+    }
+    box.appendChild(document.createTextNode(text.slice(at)));
+    if (first) setTimeout(function () { first.scrollIntoView({ block: 'center' }); }, 0);
+  }
+
   function detailBody(it, body, text, tags, secret) {
     leaveBig(); $('dbig').hidden = true;
     body.innerHTML = ''; $('dfoot').innerHTML = '';
@@ -707,7 +723,8 @@
       body.appendChild(row);
     }
     if (it.kind === 'memo') {
-      var m = document.createElement('div'); m.className = 'full'; m.textContent = text || ''; body.appendChild(m);
+      var m = document.createElement('div'); m.className = 'full'; body.appendChild(m);
+      markText(m, text || '', $('q').value.trim());
     } else {
       showImages(it, body, secret);
     }
