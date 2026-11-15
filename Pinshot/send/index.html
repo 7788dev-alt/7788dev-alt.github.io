@@ -83,6 +83,14 @@
   .lang:hover { border-color: var(--ink2); }
   :lang(ja) { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", "Noto Sans JP", sans-serif; }
   :lang(zh) { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
+  .qi .dr { padding: 4px 0; align-self: center; flex: none; font-size: 14px; }
+  .pen { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.85); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px; }
+  .pen[hidden] { display: none; }
+  .pen .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .pen .bar button.plain { color: #fff; padding: 8px 6px; }
+  .pen .sw { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
+  .pen .sw.on { border-color: #fff; }
+  .pen canvas { flex: 1; min-height: 0; max-width: 100%; object-fit: contain; touch-action: none; cursor: crosshair; background: #fff; }
 </style>
 </head>
 <body>
@@ -156,6 +164,15 @@
     </div>
   </section>
 
+  <div class="pen" id="pen" hidden>
+    <div class="bar">
+      <button class="plain" id="pencancel" type="button" data-i18n="penCancel">취소</button>
+      <span id="pencolors"></span>
+      <button class="plain" id="penundo" type="button" data-i18n="penUndo">되돌리기</button>
+      <button id="pendone" type="button" data-i18n="penDone">완료</button>
+    </div>
+    <canvas id="pencv"></canvas>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <p class="label"><span data-i18n="footer">아이폰에서 PC로는 글을 보낼 수 있고, 같은 와이파이면 사진도 받습니다. 아이폰과 같은 와이파이면 서버를 거치지 않고 바로 보냅니다. 아니면 이 페이지에서 암호화돼 중계 서버를 거쳐 가고, 서버에는 암호화된 채로만 남았다가 아이폰이 받으면 지워집니다. 이미지는 보내기 전에 줄여서 보냅니다 (가로 1600px).</span> <span id="relayname"></span></p>
 </main>
@@ -206,7 +223,7 @@
       photo: '사진', chars: '{n}자', viaDirect: ' · 같은 와이파이로 바로', viaServer: ' · 서버 거침',
       copy: '복사', copied: '복사됨', copyFail: '복사하지 못했습니다. 글을 끌어 골라 복사하세요.',
       copyImage: '이미지 복사', copyImageFail: '이 브라우저는 이미지 복사를 못 합니다. [저장]을 쓰세요.',
-      save: '저장', saved: '저장됨', del: '지우기', placeholder: '보낼 글을 적으세요', remove: '빼기',
+      save: '저장', saved: '저장됨', del: '지우기', placeholder: '보낼 글을 적으세요', remove: '빼기', penDraw: '그리기', penCancel: '취소', penUndo: '되돌리기', penDone: '완료',
       tooBig: '이미지가 너무 큽니다 (20MB까지).', tooBigShrunk: '줄여도 {size}라 보낼 수 없습니다 (5MB까지).',
       pasted: '붙여넣은 이미지', sendFail: '보내지 못했습니다. 인터넷 연결을 확인하세요.',
       sentLog: '{n}개를 보냈습니다', sentAllDirect: ' (서버 없이 바로)', sentSomeDirect: ' ({n}개는 서버 없이 바로)',
@@ -252,7 +269,7 @@
       photo: 'Photo', chars: '{n} chars', viaDirect: ' · direct over Wi-Fi', viaServer: ' · via server',
       copy: 'Copy', copied: 'Copied', copyFail: 'Couldn’t copy. Select the text and copy it.',
       copyImage: 'Copy Image', copyImageFail: 'This browser can’t copy images. Use [Save].',
-      save: 'Save', saved: 'Saved', del: 'Delete', placeholder: 'Type text to send', remove: 'Remove',
+      save: 'Save', saved: 'Saved', del: 'Delete', placeholder: 'Type text to send', remove: 'Remove', penDraw: 'Draw', penCancel: 'Cancel', penUndo: 'Undo', penDone: 'Done',
       tooBig: 'The image is too large (up to 20 MB).', tooBigShrunk: 'Still {size} after resizing, so it can’t be sent (up to 5 MB).',
       pasted: 'Pasted image', sendFail: 'Couldn’t send. Check your internet connection.',
       sentLog: 'Sent {n}', sentAllDirect: ' (direct, no server)', sentSomeDirect: ' ({n} direct, no server)',
@@ -298,7 +315,7 @@
       photo: '写真', chars: '{n}文字', viaDirect: ' · 同じ Wi-Fi で直接', viaServer: ' · サーバー経由',
       copy: 'コピー', copied: 'コピー済み', copyFail: 'コピーできませんでした。テキストを選択してコピーしてください。',
       copyImage: '画像をコピー', copyImageFail: 'このブラウザは画像をコピーできません。［保存］を使ってください。',
-      save: '保存', saved: '保存済み', del: '削除', placeholder: '送るテキストを入力', remove: '外す',
+      save: '保存', saved: '保存済み', del: '削除', placeholder: '送るテキストを入力', remove: '外す', penDraw: '描く', penCancel: 'キャンセル', penUndo: '元に戻す', penDone: '完了',
       tooBig: '画像が大きすぎます（20MB まで）。', tooBigShrunk: '縮小しても {size} のため送れません（5MB まで）。',
       pasted: '貼り付けた画像', sendFail: '送信できませんでした。インターネット接続を確認してください。',
       sentLog: '{n} 件送信しました', sentAllDirect: '（サーバーなしで直接）', sentSomeDirect: '（うち {n} 件はサーバーなしで直接）',
@@ -344,7 +361,7 @@
       photo: '照片', chars: '{n} 字', viaDirect: ' · 同一 Wi-Fi 直连', viaServer: ' · 经服务器',
       copy: '复制', copied: '已复制', copyFail: '无法复制。请选中文字后复制。',
       copyImage: '复制图片', copyImageFail: '此浏览器无法复制图片。请使用［保存］。',
-      save: '保存', saved: '已保存', del: '删除', placeholder: '输入要发送的文字', remove: '移除',
+      save: '保存', saved: '已保存', del: '删除', placeholder: '输入要发送的文字', remove: '移除', penDraw: '涂画', penCancel: '取消', penUndo: '撤销', penDone: '完成',
       tooBig: '图片太大（最大 20MB）。', tooBigShrunk: '缩小后仍有 {size}，无法发送（最大 5MB）。',
       pasted: '粘贴的图片', sendFail: '发送失败。请检查网络连接。',
       sentLog: '已发送 {n} 项', sentAllDirect: '（不经服务器直接发送）', sentSomeDirect: '（其中 {n} 项不经服务器直接发送）',
@@ -940,6 +957,8 @@
       if (q.kind === 'img') {
         var img = document.createElement('img'); img.alt = ''; img.src = q.url; row.appendChild(img);
         var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = q.label || q.name; row.appendChild(nm);
+        var dr = document.createElement('button'); dr.type = 'button'; dr.className = 'plain dr'; dr.textContent = t('penDraw');
+        dr.addEventListener('click', function () { penOpen(q); }); row.appendChild(dr);
       } else {
         var ta = document.createElement('textarea'); ta.placeholder = t('placeholder'); ta.value = q.text;
         ta.addEventListener('input', function () { q.text = ta.value; sync(); });
@@ -989,6 +1008,67 @@
       if (bmp.close) bmp.close();
     }
   }
+
+  // 그리기: 보낼 그림 위에 바로 선을 긋는다. 완료하면 그린 그림으로 바꿔 둔다.
+  var pen = { q: null, img: null, strokes: [], cur: null, color: '#ff3b30' };
+  ['#ff3b30', '#ffcc00', '#34c759', '#007aff', '#000000', '#ffffff'].forEach(function (c) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'sw' + (c === pen.color ? ' on' : ''); b.style.background = c;
+    b.setAttribute('aria-label', c);
+    b.addEventListener('click', function () { pen.color = c; Array.prototype.forEach.call($('pencolors').children, function (x) { x.classList.toggle('on', x === b); }); });
+    $('pencolors').appendChild(b);
+  });
+  $('pencolors').style.display = 'flex'; $('pencolors').style.gap = '8px';
+  function penPaint() {
+    var cv = $('pencv'), ctx = cv.getContext('2d');
+    ctx.drawImage(pen.img, 0, 0, cv.width, cv.height);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    pen.strokes.forEach(function (s) {
+      ctx.strokeStyle = s.color; ctx.lineWidth = s.width; ctx.beginPath();
+      s.pts.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
+      if (s.pts.length === 1) ctx.lineTo(s.pts[0][0] + 0.1, s.pts[0][1]);
+      ctx.stroke();
+    });
+  }
+  function penOpen(q) {
+    var img = new Image();
+    img.onload = function () {
+      var scale = Math.min(1, MAX_W / img.naturalWidth), cv = $('pencv');
+      cv.width = Math.max(1, Math.round(img.naturalWidth * scale)); cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
+      pen.q = q; pen.img = img; pen.strokes = []; pen.cur = null;
+      penPaint(); $('pen').hidden = false;
+    };
+    img.src = q.url;
+  }
+  function penPoint(e) {
+    var cv = $('pencv'), r = cv.getBoundingClientRect();
+    // object-fit: contain 으로 줄어 보인 실제 그림 영역 기준
+    var k = Math.min(r.width / cv.width, r.height / cv.height), w = cv.width * k, h = cv.height * k;
+    var x = (e.clientX - r.left - (r.width - w) / 2) / k, y = (e.clientY - r.top - (r.height - h) / 2) / k;
+    return [x, y];
+  }
+  $('pencv').addEventListener('pointerdown', function (e) {
+    $('pencv').setPointerCapture(e.pointerId);
+    pen.cur = { color: pen.color, width: Math.max(3, $('pencv').width / 200), pts: [penPoint(e)] };
+    pen.strokes.push(pen.cur); penPaint();
+  });
+  $('pencv').addEventListener('pointermove', function (e) { if (!pen.cur) return; pen.cur.pts.push(penPoint(e)); penPaint(); });
+  ['pointerup', 'pointercancel'].forEach(function (n) { $('pencv').addEventListener(n, function () { pen.cur = null; }); });
+  $('penundo').addEventListener('click', function () { pen.strokes.pop(); penPaint(); });
+  $('pencancel').addEventListener('click', function () { $('pen').hidden = true; pen.q = null; });
+  $('pendone').addEventListener('click', function () {
+    var q = pen.q; $('pen').hidden = true; pen.q = null;
+    if (!q || !pen.strokes.length) return;
+    $('pencv').toBlob(function (blob) {
+      if (!blob) return;
+      shrink(blob).then(function (bytes) {
+        if (bytes.length > MAX_SEND) { fail(t('tooBigShrunk', { size: sizeText(bytes.length) })); return; }
+        URL.revokeObjectURL(q.url);
+        q.bytes = bytes; q.url = URL.createObjectURL(blob); q.label = q.name + ' · ' + sizeText(bytes.length);
+        draw(); sync();
+      });
+    }, 'image/png');
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('pen').hidden) $('pencancel').click(); });
 
   function takeImage(file) {
     if (!file || !/^image\//.test(file.type)) return;
