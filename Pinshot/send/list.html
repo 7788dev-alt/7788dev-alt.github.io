@@ -109,6 +109,17 @@
   .unlock input { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
   .unlock button { align-self: flex-start; }
   .ed { display: flex; flex-direction: column; gap: 10px; }
+  /* PC 덧그리기 */
+  .drawbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .drawbar .sw { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 1px solid var(--line); }
+  .drawbar .sw.on, .drawbar button.on { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .drawbar input[type=range] { width: 110px; }
+  .drawbar button.tool { background: var(--bg); color: var(--ink); border: 1px solid var(--line); padding: 4px 12px; font-size: 14px; }
+  .stage { position: relative; align-self: center; max-width: 100%; }
+  .stage img { margin: 0; user-select: none; -webkit-user-drag: none; }
+  .stage canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; border-radius: 10px; }
+  .pics > div { position: relative; }
+  .pics img.ovl { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
   .ed input, .ed textarea { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
   .ed textarea { min-height: 220px; resize: vertical; }
   .acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -195,7 +206,7 @@
       reload: '앱 내용 가져오기', logout: '로그아웃', tabMemo: '메모', tabNote: '노트', search: '검색',
       count: '{n}개', synced: '아이폰에서 올린 때: {t}', locked: '잠긴 항목', loading: '불러오는 중…',
       noSync: '드라이브에 동기화 목록이 없습니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "PC와 동기화"를 켜 주세요. 켰는데도 안 보이면 앱과 같은 구글 계정인지 확인해 주세요.',
-      empty: '항목이 없습니다.', close: '닫기', askPassword: '잠긴 항목입니다. 아이폰에서 정한 PC 잠금 암호(백업 암호)를 넣어 주세요.', password: '암호', open: '열기', wrongPassword: '암호가 맞지 않습니다.', created: '만든 때', updated: '고친 때', lockedNote: '잠긴 항목입니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "잠긴 항목도 PC에서 열기"를 켜면 여기서 암호로 열 수 있습니다.', thumbNote: 'PC에는 작은 미리보기만 올라옵니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}', limits: 'PC에서 고친 내용은 드라이브에 바로 저장되고, 아이폰에서 Pinshot을 열 때 반영됩니다. 고정(화면 위에 띄우기), 잠긴 항목 수정 · 삭제, 그림 추가, 즐겨찾기, 글 모양(크기 · 색) 바꾸기는 아이폰 앱에서 해 주세요.', saving: '저장 중…', deleting: '삭제 중…', saved: '저장했습니다 · 아이폰에서 앱을 열면 반영됩니다', deleted: '삭제했습니다 · 아이폰에서 앱을 열면 반영됩니다', fetching: '가져오는 중…', fetched: '앱 내용을 가져왔습니다', nothingNew: '새로 바뀐 내용이 없습니다', logoutConfirm: '로그아웃할까요? 이 탭에 기억한 목록도 지워집니다.', publicPC: '공용 PC에서는 다 쓴 뒤 꼭 로그아웃해 주세요. 탭을 닫아도 브라우저가 탭을 복원하면 목록이 다시 보일 수 있습니다.', bigView: '크게 보기', actual: '원본 크기', newGroup: '새 그룹', renameGroup: '그룹 이름 바꾸기', deleteGroup: '그룹 삭제', deleteGroupConfirm: '"{g}" 그룹을 지울까요? 안의 항목은 지워지지 않고 그룹 없음이 됩니다.', groupMade: '그룹을 만들었습니다 · 아이폰에서 앱을 열면 반영됩니다', groupRenamed: '그룹 이름을 바꿨습니다 · 아이폰에서 앱을 열면 반영됩니다', groupDeleted: '그룹을 지웠습니다 · 아이폰에서 앱을 열면 반영됩니다', groupExists: '"{g}" 그룹이 이미 있습니다.', favorites: '즐겨찾기', group: '그룹', noGroup: '그룹 없음', viewList: '목록 보기', viewCard: '카드 보기', discard: '저장하지 않은 내용이 있습니다. 버리고 닫을까요?', newNote: '+ 새 노트', newNoteTitle: '새 노트', newMemo: '+ 새 메모', edit: '수정', del: '삭제', save: '저장', cancel: '취소', titlePh: '이름 (비우면 첫 줄)', textPh: '내용', tagsPh: '#태그 입력 후 Enter', pending: '아이폰 반영 대기', delConfirm: '이 항목을 지울까요? 아이폰에서 앱을 열 때 지워지고, 잠깐 동안 되돌릴 수 있습니다.', saveFailed: '저장하지 못했습니다: {e}', newTitle: '새 메모', editNote: '아이폰에서 Pinshot을 열면 반영됩니다. 같은 항목을 아이폰에서 더 나중에 고쳤으면 아이폰 쪽이 남습니다.'
+      empty: '항목이 없습니다.', close: '닫기', askPassword: '잠긴 항목입니다. 아이폰에서 정한 PC 잠금 암호(백업 암호)를 넣어 주세요.', password: '암호', open: '열기', wrongPassword: '암호가 맞지 않습니다.', created: '만든 때', updated: '고친 때', lockedNote: '잠긴 항목입니다. 아이폰 Pinshot의 설정 > 백업 > 구글 드라이브에서 "잠긴 항목도 PC에서 열기"를 켜면 여기서 암호로 열 수 있습니다.', thumbNote: 'PC에는 작은 미리보기만 올라옵니다.', noMatch: '맞는 항목이 없습니다.', all: '전체', failed: '불러오지 못했습니다: {e}', limits: 'PC에서 고친 내용은 드라이브에 바로 저장되고, 아이폰에서 Pinshot을 열 때 반영됩니다. 고정(화면 위에 띄우기), 잠긴 항목 수정 · 삭제, 그림 추가, 즐겨찾기, 글 모양(크기 · 색) 바꾸기는 아이폰 앱에서 해 주세요.', saving: '저장 중…', deleting: '삭제 중…', saved: '저장했습니다 · 아이폰에서 앱을 열면 반영됩니다', deleted: '삭제했습니다 · 아이폰에서 앱을 열면 반영됩니다', fetching: '가져오는 중…', fetched: '앱 내용을 가져왔습니다', nothingNew: '새로 바뀐 내용이 없습니다', logoutConfirm: '로그아웃할까요? 이 탭에 기억한 목록도 지워집니다.', publicPC: '공용 PC에서는 다 쓴 뒤 꼭 로그아웃해 주세요. 탭을 닫아도 브라우저가 탭을 복원하면 목록이 다시 보일 수 있습니다.', bigView: '크게 보기', actual: '원본 크기', newGroup: '새 그룹', renameGroup: '그룹 이름 바꾸기', deleteGroup: '그룹 삭제', deleteGroupConfirm: '"{g}" 그룹을 지울까요? 안의 항목은 지워지지 않고 그룹 없음이 됩니다.', groupMade: '그룹을 만들었습니다 · 아이폰에서 앱을 열면 반영됩니다', groupRenamed: '그룹 이름을 바꿨습니다 · 아이폰에서 앱을 열면 반영됩니다', groupDeleted: '그룹을 지웠습니다 · 아이폰에서 앱을 열면 반영됩니다', groupExists: '"{g}" 그룹이 이미 있습니다.', draw: '그리기', eraser: '지우개', undo: '되돌리기', clearAll: '모두 지우기', lineWidth: '굵기', drawNote: '그린 선은 아이폰에서 Pinshot을 열 때 그림에 합쳐집니다. 합쳐진 뒤에는 선을 하나씩 고칠 수 없습니다.', drawSaved: '그림을 저장했습니다 · 아이폰에서 앱을 열면 반영됩니다', drawPending: '그린 선 · 아이폰 반영 대기', favorites: '즐겨찾기', group: '그룹', noGroup: '그룹 없음', viewList: '목록 보기', viewCard: '카드 보기', discard: '저장하지 않은 내용이 있습니다. 버리고 닫을까요?', newNote: '+ 새 노트', newNoteTitle: '새 노트', newMemo: '+ 새 메모', edit: '수정', del: '삭제', save: '저장', cancel: '취소', titlePh: '이름 (비우면 첫 줄)', textPh: '내용', tagsPh: '#태그 입력 후 Enter', pending: '아이폰 반영 대기', delConfirm: '이 항목을 지울까요? 아이폰에서 앱을 열 때 지워지고, 잠깐 동안 되돌릴 수 있습니다.', saveFailed: '저장하지 못했습니다: {e}', newTitle: '새 메모', editNote: '아이폰에서 Pinshot을 열면 반영됩니다. 같은 항목을 아이폰에서 더 나중에 고쳤으면 아이폰 쪽이 남습니다.'
     },
     en: {
       title: 'Pinshot My List', navSend: 'Send & Receive', navList: 'My List',
@@ -204,7 +215,7 @@
       reload: 'Get from App', logout: 'Sign Out', tabMemo: 'Memos', tabNote: 'Notes', search: 'Search',
       count: '{n} items', synced: 'Uploaded from iPhone: {t}', locked: 'Locked Item', loading: 'Loading…',
       noSync: 'No synced list found in Drive. Turn on "Sync with PC" in Pinshot on your iPhone (Settings > Backup > Google Drive). If it is on, check that you signed in with the same Google account as the app.',
-      empty: 'No items.', close: 'Close', askPassword: 'This item is locked. Enter the PC lock password (backup password) you set on your iPhone.', password: 'Password', open: 'Open', wrongPassword: 'Incorrect password.', created: 'Created', updated: 'Edited', lockedNote: 'This item is locked. Turn on "Open Locked Items on PC Too" in Pinshot on your iPhone (Settings > Backup > Google Drive) to open it here with a password.', thumbNote: 'Only a small preview is uploaded for PC.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}', limits: 'Changes made on PC are saved to Drive right away and applied when you open Pinshot on your iPhone. Pinning (floating on screen), editing or deleting locked items, adding images, favorites, and changing text style (size, color) must be done in the iPhone app.', saving: 'Saving…', deleting: 'Deleting…', saved: 'Saved · applied when you open the app on your iPhone', deleted: 'Deleted · applied when you open the app on your iPhone', fetching: 'Getting…', fetched: 'Got the latest from the app', nothingNew: 'Nothing new', logoutConfirm: 'Sign out? The list remembered in this tab will also be cleared.', publicPC: 'On a shared PC, be sure to log out when you\'re done. Even after closing the tab, the list may reappear if the browser restores tabs.', bigView: 'Enlarge', actual: 'Actual Size', newGroup: 'New Group', renameGroup: 'Rename Group', deleteGroup: 'Delete Group', deleteGroupConfirm: 'Delete the group "{g}"? Its items won\'t be deleted; they\'ll become ungrouped.', groupMade: 'Group created · applied when you open the app on your iPhone', groupRenamed: 'Group renamed · applied when you open the app on your iPhone', groupDeleted: 'Group deleted · applied when you open the app on your iPhone', groupExists: 'A group named "{g}" already exists.', favorites: 'Favorites', group: 'Group', noGroup: 'No Group', viewList: 'List View', viewCard: 'Card View', discard: 'You have unsaved changes. Discard and close?', newNote: '+ New Note', newNoteTitle: 'New Note', newMemo: '+ New Memo', edit: 'Edit', del: 'Delete', save: 'Save', cancel: 'Cancel', titlePh: 'Name (first line if empty)', textPh: 'Text', tagsPh: 'Type a #tag and press Enter', pending: 'Waiting for iPhone', delConfirm: 'Delete this item? It will be deleted when you open the app on your iPhone, and you can undo it for a moment.', saveFailed: 'Couldn\'t save: {e}', newTitle: 'New Memo', editNote: 'Changes are applied when you open Pinshot on your iPhone. If the same item was edited later on your iPhone, the iPhone version is kept.'
+      empty: 'No items.', close: 'Close', askPassword: 'This item is locked. Enter the PC lock password (backup password) you set on your iPhone.', password: 'Password', open: 'Open', wrongPassword: 'Incorrect password.', created: 'Created', updated: 'Edited', lockedNote: 'This item is locked. Turn on "Open Locked Items on PC Too" in Pinshot on your iPhone (Settings > Backup > Google Drive) to open it here with a password.', thumbNote: 'Only a small preview is uploaded for PC.', noMatch: 'No matching items.', all: 'All', failed: 'Couldn\'t load: {e}', limits: 'Changes made on PC are saved to Drive right away and applied when you open Pinshot on your iPhone. Pinning (floating on screen), editing or deleting locked items, adding images, favorites, and changing text style (size, color) must be done in the iPhone app.', saving: 'Saving…', deleting: 'Deleting…', saved: 'Saved · applied when you open the app on your iPhone', deleted: 'Deleted · applied when you open the app on your iPhone', fetching: 'Getting…', fetched: 'Got the latest from the app', nothingNew: 'Nothing new', logoutConfirm: 'Sign out? The list remembered in this tab will also be cleared.', publicPC: 'On a shared PC, be sure to log out when you\'re done. Even after closing the tab, the list may reappear if the browser restores tabs.', bigView: 'Enlarge', actual: 'Actual Size', newGroup: 'New Group', renameGroup: 'Rename Group', deleteGroup: 'Delete Group', deleteGroupConfirm: 'Delete the group "{g}"? Its items won\'t be deleted; they\'ll become ungrouped.', groupMade: 'Group created · applied when you open the app on your iPhone', groupRenamed: 'Group renamed · applied when you open the app on your iPhone', groupDeleted: 'Group deleted · applied when you open the app on your iPhone', groupExists: 'A group named "{g}" already exists.', draw: 'Draw', eraser: 'Eraser', undo: 'Undo', clearAll: 'Clear All', lineWidth: 'Width', drawNote: 'Your drawing is merged into the image when you open Pinshot on your iPhone. After that, lines can\'t be edited one by one.', drawSaved: 'Drawing saved · applied when you open the app on your iPhone', drawPending: 'Drawing · waiting for iPhone', favorites: 'Favorites', group: 'Group', noGroup: 'No Group', viewList: 'List View', viewCard: 'Card View', discard: 'You have unsaved changes. Discard and close?', newNote: '+ New Note', newNoteTitle: 'New Note', newMemo: '+ New Memo', edit: 'Edit', del: 'Delete', save: 'Save', cancel: 'Cancel', titlePh: 'Name (first line if empty)', textPh: 'Text', tagsPh: 'Type a #tag and press Enter', pending: 'Waiting for iPhone', delConfirm: 'Delete this item? It will be deleted when you open the app on your iPhone, and you can undo it for a moment.', saveFailed: 'Couldn\'t save: {e}', newTitle: 'New Memo', editNote: 'Changes are applied when you open Pinshot on your iPhone. If the same item was edited later on your iPhone, the iPhone version is kept.'
     },
     ja: {
       title: 'Pinshot マイリスト', navSend: '送受信', navList: 'マイリスト',
@@ -213,7 +224,7 @@
       reload: 'アプリから取り込む', logout: 'ログアウト', tabMemo: 'メモ', tabNote: 'ノート', search: '検索',
       count: '{n}件', synced: 'iPhone からのアップロード: {t}', locked: 'ロックされた項目', loading: '読み込み中…',
       noSync: 'ドライブに同期一覧がありません。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「PCと同期」をオンにしてください。オンでも表示されない場合は、アプリと同じ Google アカウントか確認してください。',
-      empty: '項目がありません。', close: '閉じる', askPassword: 'ロックされた項目です。iPhone で設定した PC ロック用パスワード（バックアップのパスワード）を入力してください。', password: 'パスワード', open: '開く', wrongPassword: 'パスワードが違います。', created: '作成', updated: '編集', lockedNote: 'ロックされた項目です。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「ロックした項目もPCで開く」をオンにすると、ここでパスワードで開けます。', thumbNote: 'PC には小さなプレビューのみアップロードされます。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}', limits: 'PC で変更した内容はすぐにドライブに保存され、iPhone で Pinshot を開いたときに反映されます。固定（画面に浮かべる）、ロックした項目の編集・削除、画像の追加、お気に入り、文字の見た目（サイズ・色）の変更は iPhone のアプリで行ってください。', saving: '保存中…', deleting: '削除中…', saved: '保存しました · iPhone でアプリを開くと反映されます', deleted: '削除しました · iPhone でアプリを開くと反映されます', fetching: '取り込み中…', fetched: 'アプリの内容を取り込みました', nothingNew: '新しい変更はありません', logoutConfirm: 'ログアウトしますか？ このタブに保存した一覧も消去されます。', publicPC: '共用 PC では使い終わったら必ずログアウトしてください。タブを閉じても、ブラウザがタブを復元すると一覧が再び表示されることがあります。', bigView: '拡大表示', actual: '原寸', newGroup: '新規グループ', renameGroup: 'グループ名を変更', deleteGroup: 'グループを削除', deleteGroupConfirm: '「{g}」グループを削除しますか？ 中の項目は削除されず、グループなしになります。', groupMade: 'グループを作成しました · iPhone でアプリを開くと反映されます', groupRenamed: 'グループ名を変更しました · iPhone でアプリを開くと反映されます', groupDeleted: 'グループを削除しました · iPhone でアプリを開くと反映されます', groupExists: '「{g}」グループはすでにあります。', favorites: 'お気に入り', group: 'グループ', noGroup: 'グループなし', viewList: 'リスト表示', viewCard: 'カード表示', discard: '保存していない変更があります。破棄して閉じますか？', newNote: '+ 新規ノート', newNoteTitle: '新規ノート', newMemo: '+ 新規メモ', edit: '編集', del: '削除', save: '保存', cancel: 'キャンセル', titlePh: '名前（空なら1行目）', textPh: '内容', tagsPh: '#タグを入力して Enter', pending: 'iPhone への反映待ち', delConfirm: 'この項目を削除しますか？ iPhone でアプリを開いたときに削除され、しばらくの間は取り消せます。', saveFailed: '保存できませんでした: {e}', newTitle: '新規メモ', editNote: 'iPhone で Pinshot を開くと反映されます。同じ項目を iPhone で後から編集した場合は iPhone 側が残ります。'
+      empty: '項目がありません。', close: '閉じる', askPassword: 'ロックされた項目です。iPhone で設定した PC ロック用パスワード（バックアップのパスワード）を入力してください。', password: 'パスワード', open: '開く', wrongPassword: 'パスワードが違います。', created: '作成', updated: '編集', lockedNote: 'ロックされた項目です。iPhone の Pinshot で 設定 > バックアップ > Google ドライブ の「ロックした項目もPCで開く」をオンにすると、ここでパスワードで開けます。', thumbNote: 'PC には小さなプレビューのみアップロードされます。', noMatch: '一致する項目がありません。', all: 'すべて', failed: '読み込めませんでした: {e}', limits: 'PC で変更した内容はすぐにドライブに保存され、iPhone で Pinshot を開いたときに反映されます。固定（画面に浮かべる）、ロックした項目の編集・削除、画像の追加、お気に入り、文字の見た目（サイズ・色）の変更は iPhone のアプリで行ってください。', saving: '保存中…', deleting: '削除中…', saved: '保存しました · iPhone でアプリを開くと反映されます', deleted: '削除しました · iPhone でアプリを開くと反映されます', fetching: '取り込み中…', fetched: 'アプリの内容を取り込みました', nothingNew: '新しい変更はありません', logoutConfirm: 'ログアウトしますか？ このタブに保存した一覧も消去されます。', publicPC: '共用 PC では使い終わったら必ずログアウトしてください。タブを閉じても、ブラウザがタブを復元すると一覧が再び表示されることがあります。', bigView: '拡大表示', actual: '原寸', newGroup: '新規グループ', renameGroup: 'グループ名を変更', deleteGroup: 'グループを削除', deleteGroupConfirm: '「{g}」グループを削除しますか？ 中の項目は削除されず、グループなしになります。', groupMade: 'グループを作成しました · iPhone でアプリを開くと反映されます', groupRenamed: 'グループ名を変更しました · iPhone でアプリを開くと反映されます', groupDeleted: 'グループを削除しました · iPhone でアプリを開くと反映されます', groupExists: '「{g}」グループはすでにあります。', draw: '描く', eraser: '消しゴム', undo: '取り消す', clearAll: 'すべて消去', lineWidth: '太さ', drawNote: '描いた線は iPhone で Pinshot を開いたときに画像に合成されます。合成後は線を1本ずつ編集できません。', drawSaved: '描画を保存しました · iPhone でアプリを開くと反映されます', drawPending: '描いた線 · iPhone への反映待ち', favorites: 'お気に入り', group: 'グループ', noGroup: 'グループなし', viewList: 'リスト表示', viewCard: 'カード表示', discard: '保存していない変更があります。破棄して閉じますか？', newNote: '+ 新規ノート', newNoteTitle: '新規ノート', newMemo: '+ 新規メモ', edit: '編集', del: '削除', save: '保存', cancel: 'キャンセル', titlePh: '名前（空なら1行目）', textPh: '内容', tagsPh: '#タグを入力して Enter', pending: 'iPhone への反映待ち', delConfirm: 'この項目を削除しますか？ iPhone でアプリを開いたときに削除され、しばらくの間は取り消せます。', saveFailed: '保存できませんでした: {e}', newTitle: '新規メモ', editNote: 'iPhone で Pinshot を開くと反映されます。同じ項目を iPhone で後から編集した場合は iPhone 側が残ります。'
     },
     zh: {
       title: 'Pinshot 我的列表', navSend: '互传', navList: '我的列表',
@@ -222,7 +233,7 @@
       reload: '从应用获取', logout: '退出登录', tabMemo: '备忘', tabNote: '笔记', search: '搜索',
       count: '{n} 项', synced: '从 iPhone 上传于：{t}', locked: '已锁定的项目', loading: '正在加载…',
       noSync: '云端硬盘中没有同步列表。请在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“与电脑同步”。如果已打开仍看不到，请确认登录的是与 App 相同的 Google 账号。',
-      empty: '没有项目。', close: '关闭', askPassword: '此项目已锁定。请输入在 iPhone 上设置的电脑锁定密码（备份密码）。', password: '密码', open: '打开', wrongPassword: '密码不正确。', created: '创建于', updated: '编辑于', lockedNote: '此项目已锁定。在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“在电脑上也能打开锁定项目”后，即可在这里用密码打开。', thumbNote: '电脑端只上传小预览图。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}', limits: '在电脑上所做的更改会立即保存到云端硬盘，并在 iPhone 上打开 Pinshot 时生效。固定（悬浮在屏幕上）、编辑或删除锁定项目、添加图片、收藏以及更改文字样式（大小、颜色）请在 iPhone 应用中操作。', saving: '正在保存…', deleting: '正在删除…', saved: '已保存 · 在 iPhone 上打开应用后生效', deleted: '已删除 · 在 iPhone 上打开应用后生效', fetching: '正在获取…', fetched: '已获取应用内容', nothingNew: '没有新的更改', logoutConfirm: '要退出登录吗？此标签页中记住的列表也会被清除。', publicPC: '在公用电脑上，使用完毕后请务必退出登录。即使关闭了标签页，如果浏览器恢复标签页，列表仍可能再次显示。', bigView: '放大查看', actual: '原始大小', newGroup: '新建分组', renameGroup: '重命名分组', deleteGroup: '删除分组', deleteGroupConfirm: '要删除“{g}”分组吗？其中的项目不会被删除，将变为无分组。', groupMade: '已创建分组 · 在 iPhone 上打开应用后生效', groupRenamed: '已重命名分组 · 在 iPhone 上打开应用后生效', groupDeleted: '已删除分组 · 在 iPhone 上打开应用后生效', groupExists: '已有“{g}”分组。', favorites: '收藏', group: '分组', noGroup: '无分组', viewList: '列表视图', viewCard: '卡片视图', discard: '有未保存的更改。要放弃并关闭吗？', newNote: '+ 新建笔记', newNoteTitle: '新建笔记', newMemo: '+ 新建备忘录', edit: '编辑', del: '删除', save: '保存', cancel: '取消', titlePh: '名称（留空则用第一行）', textPh: '内容', tagsPh: '输入 #标签 后按 Enter', pending: '等待同步到 iPhone', delConfirm: '要删除此项目吗？在 iPhone 上打开应用时会删除，并可在短时间内撤销。', saveFailed: '无法保存：{e}', newTitle: '新建备忘录', editNote: '在 iPhone 上打开 Pinshot 后生效。如果在 iPhone 上更晚编辑了同一项目，将保留 iPhone 上的版本。'
+      empty: '没有项目。', close: '关闭', askPassword: '此项目已锁定。请输入在 iPhone 上设置的电脑锁定密码（备份密码）。', password: '密码', open: '打开', wrongPassword: '密码不正确。', created: '创建于', updated: '编辑于', lockedNote: '此项目已锁定。在 iPhone 的 Pinshot 中打开 设置 > 备份 > Google 云端硬盘 里的“在电脑上也能打开锁定项目”后，即可在这里用密码打开。', thumbNote: '电脑端只上传小预览图。', noMatch: '没有匹配的项目。', all: '全部', failed: '无法加载：{e}', limits: '在电脑上所做的更改会立即保存到云端硬盘，并在 iPhone 上打开 Pinshot 时生效。固定（悬浮在屏幕上）、编辑或删除锁定项目、添加图片、收藏以及更改文字样式（大小、颜色）请在 iPhone 应用中操作。', saving: '正在保存…', deleting: '正在删除…', saved: '已保存 · 在 iPhone 上打开应用后生效', deleted: '已删除 · 在 iPhone 上打开应用后生效', fetching: '正在获取…', fetched: '已获取应用内容', nothingNew: '没有新的更改', logoutConfirm: '要退出登录吗？此标签页中记住的列表也会被清除。', publicPC: '在公用电脑上，使用完毕后请务必退出登录。即使关闭了标签页，如果浏览器恢复标签页，列表仍可能再次显示。', bigView: '放大查看', actual: '原始大小', newGroup: '新建分组', renameGroup: '重命名分组', deleteGroup: '删除分组', deleteGroupConfirm: '要删除“{g}”分组吗？其中的项目不会被删除，将变为无分组。', groupMade: '已创建分组 · 在 iPhone 上打开应用后生效', groupRenamed: '已重命名分组 · 在 iPhone 上打开应用后生效', groupDeleted: '已删除分组 · 在 iPhone 上打开应用后生效', groupExists: '已有“{g}”分组。', draw: '绘制', eraser: '橡皮擦', undo: '撤销', clearAll: '全部清除', lineWidth: '粗细', drawNote: '绘制的线条会在 iPhone 上打开 Pinshot 时合并到图片中。合并后无法逐条编辑线条。', drawSaved: '已保存绘制 · 在 iPhone 上打开应用后生效', drawPending: '绘制的线条 · 等待同步到 iPhone', favorites: '收藏', group: '分组', noGroup: '无分组', viewList: '列表视图', viewCard: '卡片视图', discard: '有未保存的更改。要放弃并关闭吗？', newNote: '+ 新建笔记', newNoteTitle: '新建笔记', newMemo: '+ 新建备忘录', edit: '编辑', del: '删除', save: '保存', cancel: '取消', titlePh: '名称（留空则用第一行）', textPh: '内容', tagsPh: '输入 #标签 后按 Enter', pending: '等待同步到 iPhone', delConfirm: '要删除此项目吗？在 iPhone 上打开应用时会删除，并可在短时间内撤销。', saveFailed: '无法保存：{e}', newTitle: '新建备忘录', editNote: '在 iPhone 上打开 Pinshot 后生效。如果在 iPhone 上更晚编辑了同一项目，将保留 iPhone 上的版本。'
     }
   };
   var HTML_LANG = { ko: 'ko', en: 'en', ja: 'ja', zh: 'zh-Hans' };
@@ -416,8 +427,10 @@
   }
   function addEditNow(entry) {
     return loadEdits().then(function () {
-      var prev = edits.filter(function (e) { return e.id === entry.id; })[0];
-      edits = edits.filter(function (e) { return e.id !== entry.id; });
+      // 그리기(draw)는 이름 · 태그 고치기와 따로 둔다 (같은 항목에 둘 다 있을 수 있다). 지우면 둘 다 뺀다.
+      function same(e) { return e.id === entry.id && (entry.op === 'delete' || (e.op === 'draw') === (entry.op === 'draw')); }
+      var prev = entry.op === 'draw' ? null : edits.filter(function (e) { return e.id === entry.id && e.op !== 'draw'; })[0];
+      edits = edits.filter(function (e) { return !same(e); });
       // 이전 변경의 그룹 바꾸기는 이어 간다 (이번에 그룹을 안 건드렸으면)
       if (prev && entry.op !== 'delete' && entry.group === undefined && prev.group !== undefined) entry.group = prev.group;
       if (prev && prev.op === 'add') {
@@ -473,9 +486,11 @@
   // items.json 위에 아직 반영 안 된 웹 변경을 겹친다 (아이폰이 더 나중에 고친 것은 그대로)
   function merged() {
     var byID = {};
-    edits.forEach(function (e) { byID[e.id] = e; });
+    var drawn = {};
+    edits.forEach(function (e) { if (e.op === 'draw') drawn[e.id] = e; else byID[e.id] = e; });
     var out = [];
     (data.items || []).forEach(function (it) {
+      if (drawn[it.id] && !it.locked && drawn[it.id].updatedAt > (it.updatedAt || '')) it = Object.assign({}, it, { pending: true, drawFile: drawn[it.id].file });
       var e = byID[it.id];
       if (!e || it.locked || !(e.updatedAt > (it.updatedAt || ''))) return out.push(it);
       if (e.op === 'delete') return;
@@ -706,6 +721,113 @@
         .catch(function () {})
         .then(function () { if (--left === 0) wait.remove(); });
     });
+    // PC 에서 그린 선 (아이폰 반영 전): 그림 위에 겹쳐 보인다
+    if (it.drawFile && ids.length === 1) {
+      overlayURL(it.drawFile).then(function (url) {
+        var o = document.createElement('img'); o.className = 'ovl'; o.src = url; o.alt = ''; boxes[0].appendChild(o);
+        var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = '✏️ ' + t('drawPending'); body.insertBefore(sub, pics.nextSibling);
+      }).catch(function () {});
+    }
+  }
+  var drawURLs = {};
+  function overlayURL(fileID) {
+    if (drawURLs[fileID]) return Promise.resolve(drawURLs[fileID]);
+    return api(API + '/' + fileID + '?alt=media').then(function (r) { return r.blob(); })
+      .then(function (b) { return (drawURLs[fileID] = URL.createObjectURL(b)); });
+  }
+  // 그린 선(투명 PNG)을 동기화 폴더에 올린다. 같은 항목에 다시 그리면 그 파일을 덮어쓴다.
+  function uploadDrawing(itemID, blob, existing) {
+    var head = { Authorization: 'Bearer ' + token };
+    var req;
+    if (existing) {
+      head['Content-Type'] = 'image/png';
+      req = fetch(UPLOAD + '/' + existing + '?uploadType=media&fields=id', { method: 'PATCH', headers: head, body: blob });
+    } else {
+      var b = 'pinshot' + Date.now();
+      head['Content-Type'] = 'multipart/related; boundary=' + b;
+      var meta = JSON.stringify({ name: 'draw-' + itemID + '.png', parents: [syncID], mimeType: 'image/png' });
+      var body = new Blob(['--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + meta + '\r\n--' + b + '\r\nContent-Type: image/png\r\n\r\n', blob, '\r\n--' + b + '--']);
+      req = fetch(UPLOAD + '?uploadType=multipart&fields=id', { method: 'POST', headers: head, body: body });
+    }
+    return req.then(function (r) {
+      if (r.status === 401) { dropToken(); $('app').hidden = true; $('signin').hidden = false; throw new Error('401'); }
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (j) { if (existing) delete drawURLs[existing]; return j.id || existing; });
+  }
+
+  // 그림 위에 덧그리기: 펜(색 · 굵기) · 지우개 · 되돌리기. 그린 선만 투명 PNG 로 올리고 아이폰이 합친다.
+  function drawForm(it) {
+    var key = it.images[0] + '|' + (it.updatedAt || '');
+    var src = imageURLs[key];
+    if (!src) return;
+    var body = $('dbody'); leaveBig(); $('dbig').hidden = true; body.innerHTML = ''; $('dfoot').innerHTML = '';
+    var bar = document.createElement('div'); bar.className = 'drawbar';
+    var stage = document.createElement('div'); stage.className = 'stage';
+    var img = document.createElement('img'); img.src = src; img.alt = '';
+    var cv = document.createElement('canvas');
+    stage.appendChild(img); stage.appendChild(cv);
+    var note = document.createElement('p'); note.className = 'sub'; note.textContent = t('drawNote');
+    body.appendChild(bar); body.appendChild(stage); body.appendChild(note);
+    var ctx = cv.getContext('2d'), color = '#ff3b30', width = 6, erasing = false, history = [];
+    var colors = ['#ff3b30', '#ff9500', '#ffcc00', '#34c759', '#007aff', '#000000', '#ffffff'];
+    var sws = colors.map(function (c) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = c; b.setAttribute('aria-label', c);
+      b.onclick = function () { color = c; erasing = false; mark(); };
+      bar.appendChild(b); return b;
+    });
+    var range = document.createElement('input'); range.type = 'range'; range.min = 2; range.max = 40; range.value = width;
+    range.setAttribute('aria-label', t('lineWidth')); range.title = t('lineWidth');
+    range.oninput = function () { width = +range.value; };
+    bar.appendChild(range);
+    function tool(label, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'tool'; b.textContent = label; b.onclick = fn; bar.appendChild(b); return b; }
+    var er = tool(t('eraser'), function () { erasing = !erasing; mark(); });
+    tool(t('undo'), function () { if (!history.length) return; ctx.putImageData(history.pop(), 0, 0); dirty = true; });
+    tool(t('clearAll'), function () { snap(); ctx.clearRect(0, 0, cv.width, cv.height); dirty = true; });
+    function mark() {
+      sws.forEach(function (b, i) { b.classList.toggle('on', !erasing && colors[i] === color); });
+      er.classList.toggle('on', erasing);
+    }
+    mark();
+    function snap() { history.push(ctx.getImageData(0, 0, cv.width, cv.height)); if (history.length > 20) history.shift(); }
+    img.onload = function () {
+      cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+      // 아이폰 반영 전에 그린 것이 있으면 이어서 그린다
+      if (it.drawFile) overlayURL(it.drawFile).then(function (url) {
+        var o = new Image(); o.onload = function () { ctx.drawImage(o, 0, 0, cv.width, cv.height); }; o.src = url;
+      }).catch(function () {});
+    };
+    var last = null;
+    function pos(e) { var rc = cv.getBoundingClientRect(); return { x: (e.clientX - rc.left) * cv.width / rc.width, y: (e.clientY - rc.top) * cv.height / rc.height, k: cv.width / rc.width }; }
+    function line(a, b) {
+      ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+      ctx.strokeStyle = color; ctx.lineWidth = width * a.k * (erasing ? 2.5 : 1); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    }
+    cv.addEventListener('pointerdown', function (e) { cv.setPointerCapture(e.pointerId); snap(); last = pos(e); line(last, last); dirty = true; });
+    cv.addEventListener('pointermove', function (e) { if (!last) return; var p = pos(e); line(last, p); last = p; });
+    function end() { last = null; }
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+
+    var acts = document.createElement('div'); acts.className = 'acts';
+    var save = document.createElement('button'); save.type = 'button'; save.textContent = t('save');
+    var cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'ghost'; cancel.textContent = t('cancel');
+    cancel.onclick = function () { if (canLeave()) openDetail(it); };
+    acts.appendChild(save); acts.appendChild(cancel); $('dfoot').appendChild(acts);
+    dirty = false;
+    save.onclick = function () {
+      if (!dirty) { openDetail(it); return; }
+      var done = busy(save, t('saving'));
+      new Promise(function (ok) { cv.toBlob(ok, 'image/png'); })
+        .then(function (blob) { return uploadDrawing(it.id, blob, it.drawFile); })
+        .then(function (fid) { return addEdit({ id: it.id, op: 'draw', file: fid, updatedAt: now() }); })
+        .then(function () {
+          done(); dirty = false; render(); toast(t('drawSaved'));
+          var fresh = merged().filter(function (x) { return x.id === it.id; })[0];
+          openDetail(fresh || it);
+        })
+        .catch(function (e) { done(); if (e.message !== '401') alert(t('saveFailed', { e: e.message })); });
+    };
   }
 
   function openDetail(it) {
@@ -766,6 +888,15 @@
     var acts = document.createElement('div'); acts.className = 'acts';
     var edit = document.createElement('button'); edit.type = 'button'; edit.textContent = t('edit');
     edit.onclick = function () { editForm(it); };
+    acts.appendChild(edit);
+    // 그림 한 장짜리 항목(노트 · 글 메모 제외)은 PC 에서 덧그릴 수 있다
+    if (it.kind !== 'memo' && !it.note && (it.images || []).length === 1) {
+      var dr = document.createElement('button'); dr.type = 'button'; dr.className = 'ghost'; dr.textContent = t('draw');
+      dr.onclick = function () {
+        if (imageURLs[it.images[0] + '|' + (it.updatedAt || '')]) drawForm(it); else toast(t('loading'));
+      };
+      acts.appendChild(dr);
+    }
     var del = document.createElement('button'); del.type = 'button'; del.className = 'danger'; del.textContent = t('del');
     del.onclick = function () {
       if (!confirm(t('delConfirm'))) return;
@@ -774,7 +905,7 @@
         .then(function () { done(); $('dlg').close(); render(); toast(t('deleted')); })
         .catch(function (e) { done(); if (e.message !== '401') alert(t('saveFailed', { e: e.message })); });
     };
-    acts.appendChild(edit); acts.appendChild(del);
+    acts.appendChild(del);
     $('dfoot').appendChild(acts);
   }
 
