@@ -105,6 +105,9 @@
   .dlg .db { padding: 16px 18px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
   .dlg .full mark { background: #ffb340; color: inherit; border-radius: 3px; }
   .dlg .full { white-space: pre-wrap; word-break: break-word; font-size: 15px; background: #fff6b8; color: #1b2030; border-radius: 10px; padding: 14px; }
+  .dlg .full .chk label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+  .dlg .full .chk input { width: 17px; height: 17px; margin: 2px 0 0; flex: none; accent-color: #1b2030; cursor: pointer; }
+  .dlg .full .chk.on span { text-decoration: line-through; opacity: .55; }
   .dlg img { max-width: 100%; border-radius: 10px; display: block; margin: 0 auto; }
   .dlg .sub { font-size: 13px; color: var(--ink2); }
   .dlg .db > div > img + img { margin-top: 0; }
@@ -881,6 +884,41 @@
     if (first) setTimeout(function () { first.scrollIntoView({ block: 'center' }); }, 0);
   }
 
+  // 체크 메모: 줄 앞 ☐ / ☑ 를 체크박스로 보이고, 누르면 잠시 모았다가 저장 (앱과 같은 글 형식)
+  var checkTimer = null;
+  function checkText(it, box, text) {
+    var lines = text.split('\n'), q = $('q').value.trim();
+    lines.forEach(function (ln, i) {
+      var row = document.createElement('div');
+      var head = ln.slice(0, 2);
+      if (head === '☐ ' || head === '☑ ') {
+        row.className = 'chk' + (head === '☑ ' ? ' on' : '');
+        var lab = document.createElement('label');
+        var b = document.createElement('input'); b.type = 'checkbox'; b.checked = head === '☑ ';
+        var s = document.createElement('span'); markText(s, ln.slice(2), q);
+        b.onchange = function () {
+          lines[i] = (b.checked ? '☑ ' : '☐ ') + lines[i].slice(2);
+          row.classList.toggle('on', b.checked);
+          queueCheck(it, lines.join('\n'));
+        };
+        lab.appendChild(b); lab.appendChild(s); row.appendChild(lab);
+      } else {
+        markText(row, ln || ' ', q);
+      }
+      box.appendChild(row);
+    });
+  }
+  function queueCheck(it, text) {
+    var title = (it.isNew && it.title === firstLine(it.text)) ? '' : (it.title || '');
+    it.text = text;
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(function () {
+      addEdit({ id: it.id, op: 'update', title: title, tags: it.tags || [], text: text, updatedAt: now() })
+        .then(function () { toast(t('saved')); render(); })
+        .catch(function (e) { if (e.message !== '401') toast(t('saveFailed', { e: e.message })); });
+    }, 800);
+  }
+
   function detailBody(it, body, text, tags, secret) {
     leaveBig(); $('dbig').hidden = true;
     body.innerHTML = ''; $('dfoot').innerHTML = '';
@@ -891,7 +929,8 @@
     }
     if (it.kind === 'memo') {
       var m = document.createElement('div'); m.className = 'full'; body.appendChild(m);
-      markText(m, text || '', $('q').value.trim());
+      if (!it.locked && /^[☐☑] /m.test(text || '')) checkText(it, m, text);
+      else markText(m, text || '', $('q').value.trim());
     } else {
       showImages(it, body, secret);
     }
