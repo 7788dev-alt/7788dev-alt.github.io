@@ -57,7 +57,8 @@
   /* 메모 탭: 줄 목록 (왼쪽 작은 그림 · 이름 · 내용 첫 줄 · 날짜와 태그) */
   .gsec { grid-column: 1 / -1; font-size: 13px; font-weight: 700; color: var(--ink2); padding: 14px 2px 2px; }
   .gsec:first-child { padding-top: 0; }
-  .gsec { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .gsec { cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .gsec:hover .fold { color: var(--ink); }
   .gsec .fold { border: 0; background: transparent; color: var(--ink2); padding: 2px 4px; display: flex; cursor: pointer; transition: transform .15s; }
   .gsec .fold svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .gsec .fold.shut { transform: rotate(180deg); }
@@ -657,9 +658,10 @@
         var h = document.createElement('div'); h.className = 'gsec';
         var key = tab + ':' + (g || ''), shut = !!folded[key];
         var lab = document.createElement('span'); lab.textContent = (g || t('noGroup')) + ' · ' + part.length;
-        var fb = document.createElement('button'); fb.type = 'button'; fb.className = 'fold' + (shut ? ' shut' : ''); fb.innerHTML = CHEV;
-        fb.setAttribute('aria-expanded', String(!shut)); fb.setAttribute('aria-label', g || t('noGroup'));
-        fb.onclick = function () { if (shut) delete folded[key]; else folded[key] = 1; saveFold(); render(); };
+        var fb = document.createElement('span'); fb.className = 'fold' + (shut ? ' shut' : ''); fb.innerHTML = CHEV;
+        h.setAttribute('role', 'button'); h.tabIndex = 0; h.setAttribute('aria-expanded', String(!shut));
+        h.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); h.onclick(); } };
+        h.onclick = function () { if (shut) delete folded[key]; else folded[key] = 1; saveFold(); render(); };
         h.appendChild(lab); h.appendChild(fb);
         grid.appendChild(h);
         if (!shut) part.forEach(function (it) { grid.appendChild(card(it)); });
@@ -1063,7 +1065,7 @@
       group.value = last = name; dirty = true;
     };
     var note = document.createElement('p'); note.className = 'sub'; note.textContent = t('editNote');
-    var acts = document.createElement('div'); acts.className = 'acts';
+    var acts = document.createElement('div'); acts.className = 'acts'; acts.style.justifyContent = 'flex-end'; acts.style.flex = '1';
     var save = document.createElement('button'); save.type = 'submit'; save.textContent = t('save');
     var cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'ghost'; cancel.textContent = t('cancel');
     cancel.onclick = function () { if (!canLeave()) return; if (it) openDetail(it); else $('dlg').close(); };
