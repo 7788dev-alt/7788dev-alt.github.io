@@ -57,6 +57,9 @@
   /* 메모 탭: 줄 목록 (왼쪽 작은 그림 · 이름 · 내용 첫 줄 · 날짜와 태그) */
   .gsec { grid-column: 1 / -1; font-size: 13px; font-weight: 700; color: var(--ink2); padding: 14px 2px 2px; }
   .gsec:first-child { padding-top: 0; }
+  .gsec { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .gsec .fold { border: 0; background: transparent; color: var(--ink2); padding: 2px 6px; font-size: 13px; line-height: 1; cursor: pointer; transition: transform .15s; }
+  .gsec .fold.shut { transform: rotate(-90deg); }
   .grid.rows .gsec { padding: 12px 14px 6px; background: var(--bg, transparent); border-bottom: 1px solid var(--line); }
   .grid.rows { grid-template-columns: 1fr; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .rows .it { flex-direction: row; align-items: center; gap: 12px; border: 0; border-radius: 0; border-bottom: 1px solid var(--line); padding: 8px 12px; }
@@ -282,6 +285,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var token = null, client = null, data = null, tab = 'memo', picked = [];   // 고른 태그 (여러 개면 모두 붙은 항목만, 앱과 같게)
   // 그룹 줄: 탭마다 따로 (null = 전체, '\u0001fav' = 즐겨찾기)
+  var FOLD_STORE = 'pinshot.folded', folded = {};
+  try { folded = JSON.parse(localStorage.getItem(FOLD_STORE)) || {}; } catch (e) {}
   var FAV = '\u0001fav', groupSel = { memo: null, note: null };
   // PC 에서 만든 · 바꾼 · 지운 그룹 (아이폰 반영 전). 지금 탭 것만.
   function groupOps() {
@@ -635,9 +640,14 @@
         var part = list.filter(function (it) { return g ? it.group === g : !it.group || gnames.indexOf(it.group) < 0; });
         if (!part.length) return;
         var h = document.createElement('div'); h.className = 'gsec';
-        h.textContent = (g || t('noGroup')) + ' · ' + part.length;
+        var key = tab + ':' + (g || ''), shut = !!folded[key];
+        var lab = document.createElement('span'); lab.textContent = (g || t('noGroup')) + ' · ' + part.length;
+        var fb = document.createElement('button'); fb.type = 'button'; fb.className = 'fold' + (shut ? ' shut' : ''); fb.textContent = '▾';
+        fb.setAttribute('aria-expanded', String(!shut)); fb.setAttribute('aria-label', g || t('noGroup'));
+        fb.onclick = function () { if (shut) delete folded[key]; else folded[key] = 1; try { localStorage.setItem(FOLD_STORE, JSON.stringify(folded)); } catch (e) {} render(); };
+        h.appendChild(lab); h.appendChild(fb);
         grid.appendChild(h);
-        part.forEach(function (it) { grid.appendChild(card(it)); });
+        if (!shut) part.forEach(function (it) { grid.appendChild(card(it)); });
       });
     } else {
       list.forEach(function (it) { grid.appendChild(card(it)); });
