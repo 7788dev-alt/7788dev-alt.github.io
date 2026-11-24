@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <title data-i18n="title">Pinshot 내 목록</title>
 <style>
-  :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --accent: #007aff; --ok: #34c759; --bad: #d64545; --star: #f5b400; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --accent: #4c8dff; --bad: #ff6b6b; } }
+  :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --accent: #007aff; --ok: #34c759; --bad: #d64545; --star: #f5b400; --lock: #ff9500; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --accent: #4c8dff; --bad: #ff6b6b; --lock: #ff9f0a; } }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; line-height: 1.55; padding: 32px 16px 48px; }
   main { max-width: 960px; margin: 0 auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
@@ -79,7 +79,13 @@
   .it .tt .star { color: var(--star); margin-right: -2px; }
   .it .sub { font-size: 12px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .it .sub .gname { color: var(--accent); font-weight: 600; }
-  .locked .pic { font-size: 14px; }
+  .locked .pic { font-size: 14px; flex-direction: column; gap: 6px; }
+  /* 자물쇠: 앱과 같은 선 아이콘 · 주황 (잠김 = 닫힌 자물쇠, 암호로 열어 둠 = 열린 자물쇠) */
+  .lk { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--lock); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .locked .pic .lk { width: 30px; height: 30px; }
+  .rows .locked .pic .lk { width: 22px; height: 22px; }
+  .lkline { display: flex; gap: 8px; align-items: flex-start; }
+  .lkline .lk { margin-top: 2px; }
   .pempty { border: 1.5px dashed var(--line); border-radius: 12px; padding: 26px 14px; text-align: center; font-size: 14px; color: var(--ink2); }
   .err { color: var(--bad); font-size: 14px; }
   .it { cursor: pointer; }
@@ -704,11 +710,27 @@
     }
   }
 
+  // 앱 Icons.swift 의 lock / lockOpen 과 같은 Tabler 도형
+  var LOCK_PATH = {
+    shut: 'M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM11 16a1 1 0 1 0 2 0a1 1 0 1 0-2 0M8 11V7a4 4 0 1 1 8 0v4',
+    open: 'M5 11h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zM9 16a1 1 0 1 0 2 0a1 1 0 1 0-2 0M13 11V7a4 4 0 1 1 8 0v4'
+  };
+  function lockIcon(open) {
+    var ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'), path = document.createElementNS(ns, 'path');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('class', 'lk'); svg.setAttribute('aria-hidden', 'true');
+    path.setAttribute('d', LOCK_PATH[open ? 'open' : 'shut']); svg.appendChild(path);
+    return svg;
+  }
+  function lockLine(p, text) { p.className = 'lkline'; p.appendChild(lockIcon(false)); var s = document.createElement('span'); s.textContent = text; p.appendChild(s); }
+
   function card(it) {
     var el = document.createElement('div'); el.className = 'it' + (it.locked ? ' locked' : '');
     var top;
     if (it.locked) {
-      top = document.createElement('div'); top.className = 'pic'; top.textContent = isRows() ? '🔒' : '🔒 ' + t('locked');
+      top = document.createElement('div'); top.className = 'pic';
+      top.appendChild(lockIcon(!!lockKey));   // 암호를 맞혀 열어 둔 동안은 열린 자물쇠 (앱과 같게)
+      if (isRows()) top.title = t('locked');
+      else { var lt = document.createElement('span'); lt.textContent = t('locked'); top.appendChild(lt); }
     } else if (it.kind === 'memo') {
       top = document.createElement('div'); top.className = 'memo'; top.textContent = it.text || '';
     } else {
@@ -783,7 +805,7 @@
         return openBytes(b64(lock.check)).then(function (plain) {
           if (new TextDecoder().decode(plain) !== 'pinshot') throw new Error('bad');
           clearTimeout(lockTimer); lockTimer = setTimeout(relock, RELOCK_MS);
-          loadSecretText();
+          loadSecretText(); render();   // 목록 자물쇠를 열린 모양으로
         }).catch(function () { lockKey = before; throw new Error('bad'); });
       });
   }
@@ -927,7 +949,7 @@
     var body = $('dbody'); leaveBig(); $('dbig').hidden = true; body.innerHTML = ''; $('dfoot').innerHTML = '';
     if (it.locked) {
       if (!it.enc || !data.lock) {
-        var p = document.createElement('p'); p.textContent = '🔒 ' + t('lockedNote'); body.appendChild(p);
+        var p = document.createElement('p'); lockLine(p, t('lockedNote')); body.appendChild(p);
       } else if (!lockKey) {
         askPassword(it, body);
       } else {
@@ -1197,7 +1219,7 @@
 
   function askPassword(it, body) {
     var form = document.createElement('form'); form.className = 'unlock';
-    var p = document.createElement('p'); p.textContent = '🔒 ' + t('askPassword');
+    var p = document.createElement('p'); lockLine(p, t('askPassword'));
     var input = document.createElement('input'); input.type = 'password'; input.autocomplete = 'current-password';
     input.placeholder = t('password');
     var go = document.createElement('button'); go.type = 'submit'; go.textContent = t('open');
