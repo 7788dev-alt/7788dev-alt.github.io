@@ -55,7 +55,10 @@
   .it .pic img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
   .it .memo { height: 150px; padding: 10px 12px; white-space: pre-wrap; word-break: break-word; font-size: 14px; overflow: hidden; background: #fff6b8; color: #1b2030; }
   .it .meta { padding: 8px 12px 10px; }
-  .it .tt { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .it .tt { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .it .tt .tn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .it .tt .prog, .dh .prog { flex: none; font-size: 11px; font-weight: 600; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 999px; padding: 1px 7px; }
+  .dh .prog { margin-left: 6px; vertical-align: middle; }
   /* 메모 탭: 줄 목록 (왼쪽 작은 그림 · 이름 · 내용 첫 줄 · 날짜와 태그) */
   .gsec { grid-column: 1 / -1; font-size: 13px; font-weight: 700; color: var(--ink2); padding: 14px 2px 2px; }
   .gsec:first-child { padding-top: 0; }
@@ -73,7 +76,7 @@
   .rows .it .memo { padding: 4px 5px; line-height: 1.3; }
   .rows .it .meta { padding: 0; min-width: 0; flex: 1; }
   .rows .it .line { font-size: 13px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .it .tt .star { color: var(--star); margin-right: 4px; }
+  .it .tt .star { color: var(--star); margin-right: -2px; }
   .it .sub { font-size: 12px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .it .sub .gname { color: var(--accent); font-weight: 600; }
   .locked .pic { font-size: 14px; }
@@ -135,7 +138,8 @@
   .pics img.ovl { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
   .ed input, .ed textarea { font: inherit; font-size: 15px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
   .ed textarea { min-height: 220px; resize: vertical; }
-  .ed .tbar { display: flex; gap: 8px; margin-bottom: -4px; }
+  .ed .tbar { display: flex; gap: 8px; align-items: center; margin-bottom: -4px; }
+  .ed .tbar .key { font-size: 12px; color: var(--ink2); }
   .acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   button.ghost { background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
   button.danger { background: transparent; color: var(--bad); border: 1px solid var(--line); margin-left: auto; }
@@ -548,6 +552,17 @@
     });
     return out;
   }
+  // "3/5" (체크 항목 ☐ / ☑ 줄이 없으면 null) — 앱 Checklist.progressText 와 같게
+  function progressText(text) {
+    var all = (text || '').split('\n').filter(function (l) { return l.slice(0, 2) === '☐ ' || l.slice(0, 2) === '☑ '; });
+    if (!all.length) return null;
+    return all.filter(function (l) { return l.slice(0, 2) === '☑ '; }).length + '/' + all.length;
+  }
+  function detailTitle(it) {
+    $('dtitle').textContent = (it.favorite ? '★ ' : '') + (it.title || '');
+    var pg = it.kind === 'memo' && !it.locked ? progressText(it.text) : null;
+    if (pg) { var pb = document.createElement('span'); pb.className = 'prog'; pb.textContent = pg; $('dtitle').appendChild(pb); }
+  }
   function firstLine(text) { return ((text || '').split('\n')[0] || '').slice(0, 30); }
 
   function fmt(iso) {
@@ -689,7 +704,10 @@
     var meta = document.createElement('div'); meta.className = 'meta';
     var tt = document.createElement('div'); tt.className = 'tt';
     if (it.favorite) { var s = document.createElement('span'); s.className = 'star'; s.textContent = '★'; tt.appendChild(s); }
-    tt.appendChild(document.createTextNode(it.title || ''));
+    var tn = document.createElement('span'); tn.className = 'tn'; tn.textContent = it.title || ''; tt.appendChild(tn);
+    // 체크 항목이 있는 글 메모는 진행 정도 (앱과 같게, 예: 3/5)
+    var pg = it.kind === 'memo' && !it.locked ? progressText(it.text) : null;
+    if (pg) { var pb = document.createElement('span'); pb.className = 'prog'; pb.textContent = pg; tt.appendChild(pb); }
     var sub = document.createElement('div'); sub.className = 'sub';
     // 특정 그룹을 보고 있지 않을 때(전체 · 즐겨찾기)는 그룹 이름을 앞에 (웹툰뷰어처럼 강조색)
     var gs = groupSel[tab];
@@ -888,7 +906,7 @@
 
   function openDetail(it) {
     shown = it;
-    $('dtitle').textContent = (it.favorite ? '★ ' : '') + (it.title || '');
+    detailTitle(it);
     var body = $('dbody'); leaveBig(); $('dbig').hidden = true; body.innerHTML = ''; $('dfoot').innerHTML = '';
     if (it.locked) {
       if (!it.enc || !data.lock) {
@@ -949,6 +967,7 @@
   function queueCheck(it, text) {
     var title = (it.isNew && it.title === firstLine(it.text)) ? '' : (it.title || '');
     it.text = text;
+    detailTitle(it);
     clearTimeout(checkTimer);
     checkTimer = setTimeout(function () {
       addEdit({ id: it.id, op: 'update', title: title, tags: it.tags || [], text: text, updatedAt: now() })
@@ -1058,7 +1077,16 @@
       if (many) put(a, z, out, a, a + out.length); else put(a, z, out, Math.max(a, s0 + (all ? -2 : 2)));
     };
     bar.appendChild(b);
+    // 단축키: 맥 메모와 같은 ⇧⌘L (윈도 등은 Ctrl+Shift+L)
+    var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+    var key = document.createElement('span'); key.className = 'key'; key.textContent = mac ? '⇧⌘L' : 'Ctrl+Shift+L';
+    b.title = t('checklist') + ' (' + key.textContent + ')';
+    bar.appendChild(key);
     ta.addEventListener('keydown', function (e) {
+      if ((e.key === 'l' || e.key === 'L' || e.code === 'KeyL') && e.shiftKey && !e.altKey && (mac ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey)) {
+        if (e.isComposing) return;
+        e.preventDefault(); b.onclick(); return;
+      }
       if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229 || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
       var v = ta.value, s0 = ta.selectionStart, a = lineStart(v, s0), before = v.slice(a, s0);
       if (!isChk(before)) return;
