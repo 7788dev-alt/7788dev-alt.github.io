@@ -5,8 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="robots" content="noindex">
-<title data-i18n="title">Pinshot과 주고받기</title>
+<title>Pinshot PC 연결 — 아이폰과 PC 글 · 이미지 주고받기</title>
+<meta name="description" content="PC와 아이폰 사이에 글 · 이미지를 로그인 없이 주고받는 Pinshot 연결 페이지. QR만 찍으면 바로 연결되고, 내용은 암호화돼 전달됩니다.">
+<meta name="apple-itunes-app" content="app-id=6829664152">
+<link rel="alternate" hreflang="ko" href="https://7788dev-alt.github.io/Pinshot/send/?lang=ko">
+<link rel="alternate" hreflang="en" href="https://7788dev-alt.github.io/Pinshot/send/?lang=en">
+<link rel="alternate" hreflang="ja" href="https://7788dev-alt.github.io/Pinshot/send/?lang=ja">
+<link rel="alternate" hreflang="zh-Hans" href="https://7788dev-alt.github.io/Pinshot/send/?lang=zh">
+<link rel="alternate" hreflang="x-default" href="https://7788dev-alt.github.io/Pinshot/send/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pinshot">
+<meta property="og:title" content="Pinshot PC 연결 — 아이폰과 PC 글 · 이미지 주고받기">
+<meta property="og:description" content="QR만 찍으면 로그인 없이 PC와 아이폰이 글 · 이미지를 주고받습니다.">
+<meta property="og:url" content="https://7788dev-alt.github.io/Pinshot/send/">
+<meta property="og:image" content="https://7788dev-alt.github.io/Pinshot/send/apple-touch-icon.png">
 <style>
   :root { --bg: #f4f5f8; --card: #fff; --ink: #1b2030; --ink2: #5a6275; --line: #d6dae2; --accent: #007aff; --ok: #34c759; --bad: #d64545; }
   @media (prefers-color-scheme: dark) { :root { --bg: #111317; --card: #1b1e24; --ink: #eceff5; --ink2: #a9b2c3; --line: #2f3540; --accent: #4c8dff; --bad: #ff6b6b; } }
@@ -92,6 +104,10 @@
   .pen .bar button.plain { color: #fff; padding: 8px 6px; }
   .pen .sw { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
   .pen .sw.on { border-color: #fff; }
+  .about { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .about b { font-size: 15px; }
+  .about .store { align-self: flex-start; font-size: 14px; font-weight: 600; text-decoration: none; color: #fff; background: #000; border-radius: 10px; padding: 8px 16px; }
+  @media (prefers-color-scheme: dark) { .about .store { background: #fff; color: #000; } }
   .pen canvas { flex: 1; min-height: 0; max-width: 100%; object-fit: contain; touch-action: none; cursor: crosshair; background: #fff; }
 </style>
 </head>
@@ -177,6 +193,11 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <p class="label"><span data-i18n="footer">아이폰에서 PC로는 글을 보낼 수 있고, 같은 와이파이면 사진도 받습니다. 아이폰과 같은 와이파이면 서버를 거치지 않고 바로 보냅니다. 아니면 이 페이지에서 암호화돼 중계 서버를 거쳐 가고, 서버에는 암호화된 채로만 남았다가 아이폰이 받으면 지워집니다. 이미지는 보내기 전에 줄여서 보냅니다 (가로 1600px).</span> <span id="relayname"></span></p>
+  <div class="about">
+    <b data-i18n="aboutT">Pinshot — 아이폰 플로팅 메모 · 화면 위 캡쳐 고정</b>
+    <p data-i18n="aboutD">캡쳐한 이미지나 메모를 작은 창(화면 속 화면)으로 띄워 다른 앱 위에 고정해 두는 아이폰 · 아이패드 앱입니다. 이 페이지로 로그인 없이 PC와 아이폰이 글 · 이미지를 주고받습니다.</p>
+    <a class="store" href="https://apps.apple.com/app/id6829664152" target="_blank" rel="noopener" data-i18n="appStore">App Store에서 받기</a>
+  </div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -229,7 +250,9 @@
       tooBig: '이미지가 너무 큽니다 (20MB까지).', tooBigShrunk: '줄여도 {size}라 보낼 수 없습니다 (5MB까지).',
       pasted: '붙여넣은 이미지', sendFail: '보내지 못했습니다. 인터넷 연결을 확인하세요.',
       sentLog: '{n}개를 보냈습니다', sentAllDirect: ' (서버 없이 바로)', sentSomeDirect: ' ({n}개는 서버 없이 바로)',
-      unavailable: '사용 불가', noCrypto: '이 브라우저에서는 암호화를 쓸 수 없습니다.'
+      unavailable: '사용 불가', noCrypto: '이 브라우저에서는 암호화를 쓸 수 없습니다.',
+      docTitle: 'Pinshot PC 연결 — 아이폰과 PC 글 · 이미지 주고받기', metaDesc: 'PC와 아이폰 사이에 글 · 이미지를 로그인 없이 주고받는 Pinshot 연결 페이지. QR만 찍으면 바로 연결되고, 내용은 암호화돼 전달됩니다.',
+      aboutT: 'Pinshot — 아이폰 플로팅 메모 · 화면 위 캡쳐 고정', aboutD: '캡쳐한 이미지나 메모를 작은 창(화면 속 화면)으로 띄워 다른 앱 위에 고정해 두는 아이폰 · 아이패드 앱입니다. 이 페이지로 로그인 없이 PC와 아이폰이 글 · 이미지를 주고받습니다.', appStore: 'App Store에서 받기'
     },
     en: {
       title: 'Pinshot: Send & Receive', navSend: 'Send & Receive', navList: 'My List',
@@ -275,7 +298,9 @@
       tooBig: 'The image is too large (up to 20 MB).', tooBigShrunk: 'Still {size} after resizing, so it can’t be sent (up to 5 MB).',
       pasted: 'Pasted image', sendFail: 'Couldn’t send. Check your internet connection.',
       sentLog: 'Sent {n}', sentAllDirect: ' (direct, no server)', sentSomeDirect: ' ({n} direct, no server)',
-      unavailable: 'Unavailable', noCrypto: 'Encryption isn’t available in this browser.'
+      unavailable: 'Unavailable', noCrypto: 'Encryption isn’t available in this browser.',
+      docTitle: 'Pinshot for PC — Send text & images between iPhone and PC', metaDesc: 'Send text and images between your PC and iPhone without signing in. Scan a QR code with Pinshot to connect; everything is encrypted in transit.',
+      aboutT: 'Pinshot — Floating notes & pinned screenshots for iPhone', aboutD: 'An iPhone and iPad app that pins screenshots and notes in a small floating window (Picture in Picture) on top of other apps. Use this page to send text and images between your PC and iPhone, no sign-in needed.', appStore: 'Download on the App Store'
     },
     ja: {
       title: 'Pinshot 送受信', navSend: '送受信', navList: 'マイリスト',
@@ -321,7 +346,9 @@
       tooBig: '画像が大きすぎます（20MB まで）。', tooBigShrunk: '縮小しても {size} のため送れません（5MB まで）。',
       pasted: '貼り付けた画像', sendFail: '送信できませんでした。インターネット接続を確認してください。',
       sentLog: '{n} 件送信しました', sentAllDirect: '（サーバーなしで直接）', sentSomeDirect: '（うち {n} 件はサーバーなしで直接）',
-      unavailable: '利用不可', noCrypto: 'このブラウザでは暗号化を使えません。'
+      unavailable: '利用不可', noCrypto: 'このブラウザでは暗号化を使えません。',
+      docTitle: 'Pinshot PC 連携 — iPhone と PC でテキスト・画像をやり取り', metaDesc: 'ログインなしで PC と iPhone の間でテキストや画像を送受信できる Pinshot の接続ページ。QR を読み取るだけでつながり、内容は暗号化して送られます。',
+      aboutT: 'Pinshot — iPhone のフローティングメモ・画面上にスクショを固定', aboutD: 'キャプチャした画像やメモを小さなウインドウ（ピクチャ・イン・ピクチャ）で他のアプリの上に固定できる iPhone・iPad アプリです。このページでは、ログインなしで PC と iPhone の間でテキストや画像をやり取りできます。', appStore: 'App Store からダウンロード'
     },
     zh: {
       title: 'Pinshot 互传', navSend: '互传', navList: '我的列表',
@@ -367,7 +394,9 @@
       tooBig: '图片太大（最大 20MB）。', tooBigShrunk: '缩小后仍有 {size}，无法发送（最大 5MB）。',
       pasted: '粘贴的图片', sendFail: '发送失败。请检查网络连接。',
       sentLog: '已发送 {n} 项', sentAllDirect: '（不经服务器直接发送）', sentSomeDirect: '（其中 {n} 项不经服务器直接发送）',
-      unavailable: '不可用', noCrypto: '此浏览器无法使用加密功能。'
+      unavailable: '不可用', noCrypto: '此浏览器无法使用加密功能。',
+      docTitle: 'Pinshot 电脑互传 — iPhone 与电脑互传文字和图片', metaDesc: '无需登录即可在电脑和 iPhone 之间互传文字和图片的 Pinshot 连接页面。扫描二维码即可连接，内容加密传输。',
+      aboutT: 'Pinshot — iPhone 悬浮便签 · 截图固定在屏幕上', aboutD: '把截图或便签以小窗口（画中画）固定在其他 App 上方的 iPhone · iPad 应用。通过本页面，无需登录即可在电脑和 iPhone 之间互传文字和图片。', appStore: '在 App Store 下载'
     }
   };
   var LANG_STORE = 'pinshotLang';
@@ -400,6 +429,8 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-html]'), function (el) { el.innerHTML = t(el.dataset.i18nHtml); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-aria]'), function (el) { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
     document.getElementById('lang').value = LANG;
+    document.title = t('docTitle');
+    document.querySelector('meta[name="description"]').setAttribute('content', t('metaDesc'));
   }
   applyStatic();
 

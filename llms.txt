@@ -1,0 +1,17 @@
+# 7788dev 앱
+
+> 1인 개발자 7788dev가 만든 아이폰 · 아이패드 앱 모음.
+
+## Pinshot (핀샷 - 화면 위에 띄우는 캡쳐)
+
+- [Pinshot 소개 · 자주 묻는 질문](https://7788dev-alt.github.io/Pinshot/): 캡쳐한 이미지나 글 메모를 화면 속 화면(PiP) 창으로 띄워 다른 앱 위에 고정하는 아이폰 · 아이패드 앱. 갤럭시의 "화면에 고정" · 팝업 메모처럼 아이폰에서 플로팅 메모를 쓰고 싶을 때 쓴다. 창 이동 · 크기 조절 · 가장자리로 숨기기, 일부분만 띄우기, 웹 페이지 길게 캡쳐, 글자 추출(OCR) · 번역, Face ID 잠금, 구글 드라이브 백업.
+- [Pinshot PC 연결](https://7788dev-alt.github.io/Pinshot/send/): PC 브라우저와 아이폰이 로그인 · 설치 없이 QR로 연결해 글 · 이미지를 주고받는 페이지. 내용은 암호화돼 전달된다.
+- [App Store](https://apps.apple.com/app/id6829664152)
+
+Pinshot (English): an iPhone/iPad app that pins screenshots and text notes in a floating Picture in Picture window on top of other apps, like Samsung Galaxy's "Pin to screen" or pop-up notes. Good for keeping an address, coupon code, recipe, map, vocabulary or game guide visible while using another app. Also: long web page capture, on-device OCR and translation, Face ID lock, Google Drive backup, and PC-to-iPhone text/image transfer by QR code with no sign-in.
+
+## 다른 앱
+
+- [MP3 팟캐스트](https://7788dev-alt.github.io/PodPlayer/): 내 MP3 폴더를 팟캐스트처럼 듣기
+- [웹툰뷰어](https://7788dev-alt.github.io/WebtoonViewer/): 내 만화 파일을 세로로 이어 보기
+- [ClipKey](https://7788dev-alt.github.io/ClipKey/): 클립보드 기록 키보드
