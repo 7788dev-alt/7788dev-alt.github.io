@@ -462,21 +462,22 @@
     return run;
   }
   function addEditNow(entry) {
-    return loadEdits().then(function () {
-      // 그리기(draw)는 이름 · 태그 고치기와 따로 둔다 (같은 항목에 둘 다 있을 수 있다). 지우면 둘 다 뺀다.
-      function same(e) { return e.id === entry.id && (entry.op === 'delete' || (e.op === 'draw') === (entry.op === 'draw')); }
-      var prev = entry.op === 'draw' ? null : edits.filter(function (e) { return e.id === entry.id && e.op !== 'draw'; })[0];
-      edits = edits.filter(function (e) { return !same(e); });
-      // 이전 변경의 그룹 바꾸기는 이어 간다 (이번에 그룹을 안 건드렸으면)
-      if (prev && entry.op !== 'delete' && entry.group === undefined && prev.group !== undefined) entry.group = prev.group;
-      if (prev && prev.op === 'add') {
-        // 아직 아이폰에 안 간 새 메모: 지우면 없던 일로, 고치면 새 메모 내용을 바꾼다
-        if (entry.op === 'delete') entry = null; else entry.op = 'add';
-        if (entry) { entry.note = prev.note; if (entry.group === undefined) entry.group = prev.group; }
-      }
-      if (entry) edits.push(entry);
-      return saveEdits();
-    });
+    return loadEdits().then(function () { putEdit(entry); return saveEdits(); });
+  }
+  // 변경 하나를 edits 에 넣는다 (저장은 하지 않음)
+  function putEdit(entry) {
+    // 그리기(draw)는 이름 · 태그 고치기와 따로 둔다 (같은 항목에 둘 다 있을 수 있다). 지우면 둘 다 뺀다.
+    function same(e) { return e.id === entry.id && (entry.op === 'delete' || (e.op === 'draw') === (entry.op === 'draw')); }
+    var prev = entry.op === 'draw' ? null : edits.filter(function (e) { return e.id === entry.id && e.op !== 'draw'; })[0];
+    edits = edits.filter(function (e) { return !same(e); });
+    // 이전 변경의 그룹 바꾸기는 이어 간다 (이번에 그룹을 안 건드렸으면)
+    if (prev && entry.op !== 'delete' && entry.group === undefined && prev.group !== undefined) entry.group = prev.group;
+    if (prev && prev.op === 'add') {
+      // 아직 아이폰에 안 간 새 메모: 지우면 없던 일로, 고치면 새 메모 내용을 바꾼다
+      if (entry.op === 'delete') entry = null; else entry.op = 'add';
+      if (entry) { entry.note = prev.note; if (entry.group === undefined) entry.group = prev.group; }
+    }
+    if (entry) edits.push(entry);
   }
   function saveEdits() {
     var body = JSON.stringify({ edits: edits });
@@ -941,7 +942,7 @@
   }
 
   // 체크 메모: 줄 앞 ☐ / ☑ 를 체크박스로 보이고, 누르면 잠시 모았다가 저장 (앱과 같은 글 형식)
-  var checkTimer = null;
+  var checkTimer = null, checkFlush = null;
   function checkText(it, box, text) {
     var lines = text.split('\n'), q = $('q').value.trim();
     lines.forEach(function (ln, i) {
@@ -968,12 +969,17 @@
     var title = (it.isNew && it.title === firstLine(it.text)) ? '' : (it.title || '');
     it.text = text;
     detailTitle(it);
+    // 목록에는 바로 보이게 (드라이브 저장은 잠시 모았다가)
+    var entry = { id: it.id, op: 'update', title: title, tags: it.tags || [], text: text, updatedAt: now() };
+    putEdit(Object.assign({}, entry)); render();
     clearTimeout(checkTimer);
-    checkTimer = setTimeout(function () {
-      addEdit({ id: it.id, op: 'update', title: title, tags: it.tags || [], text: text, updatedAt: now() })
+    checkFlush = function () {
+      checkFlush = null; clearTimeout(checkTimer);
+      addEdit(entry)
         .then(function () { toast(t('saved')); render(); })
         .catch(function (e) { if (e.message !== '401') toast(t('saveFailed', { e: e.message })); });
-    }, 800);
+    };
+    checkTimer = setTimeout(function () { if (checkFlush) checkFlush(); }, 800);
   }
 
   function detailBody(it, body, text, tags, secret) {
@@ -1200,7 +1206,7 @@
     if (big) { e.preventDefault(); leaveBig(); return; }   // Esc: 먼저 원래 크기로
     if (!canLeave()) e.preventDefault();
   });
-  $('dlg').addEventListener('close', function () { leaveBig(); });
+  $('dlg').addEventListener('close', function () { leaveBig(); if (checkFlush) checkFlush(); });   // 닫으면 모아 둔 체크를 바로 저장
 
   // 크게 보기 (노트 · 캡쳐 원본)
   var big = false, zs = 1, zx = 0, zy = 0, drag = null;
