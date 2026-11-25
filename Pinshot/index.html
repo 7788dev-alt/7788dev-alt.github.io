@@ -6,6 +6,11 @@
 <title>Pinshot — 아이폰 플로팅 메모 · 화면 위 캡쳐 고정 앱</title>
 <meta name="description" content="갤럭시의 화면 고정 · 팝업 메모처럼, 아이폰 · 아이패드에서 캡쳐와 메모를 작은 창(화면 속 화면)으로 띄워 다른 앱 위에 고정하는 앱 핀샷(Pinshot). 플로팅 메모, 스크린샷 고정, 글자 추출 · 번역, PC와 주고받기.">
 <link rel="canonical" href="https://7788dev-alt.github.io/Pinshot/">
+<link rel="alternate" hreflang="ko" href="https://7788dev-alt.github.io/Pinshot/?lang=ko">
+<link rel="alternate" hreflang="en" href="https://7788dev-alt.github.io/Pinshot/?lang=en">
+<link rel="alternate" hreflang="ja" href="https://7788dev-alt.github.io/Pinshot/?lang=ja">
+<link rel="alternate" hreflang="zh-Hans" href="https://7788dev-alt.github.io/Pinshot/?lang=zh">
+<link rel="alternate" hreflang="x-default" href="https://7788dev-alt.github.io/Pinshot/">
 <meta name="apple-itunes-app" content="app-id=6829664152">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Pinshot">
@@ -31,16 +36,29 @@
   .nav { font-size: 14px; margin-bottom: 28px; }
   a { color: #007aff; }
   .store { display: inline-block; margin-top: 16px; font-size: 15px; font-weight: 600; text-decoration: none; color: #fff; background: #000; border-radius: 10px; padding: 10px 18px; }
+  .nav { display: flex; align-items: center; gap: 12px; }
+  .lang { font: inherit; font-size: 13px; color: inherit; background: transparent; border: 1px solid #dfe3ea; border-radius: 8px; padding: 3px 8px; margin-left: auto; cursor: pointer; }
+  .shots { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 28px -20px 0; padding: 0 20px 8px; -webkit-overflow-scrolling: touch; }
+  .shots img { flex: 0 0 auto; width: 180px; height: auto; aspect-ratio: 414 / 900; border-radius: 16px; scroll-snap-align: start; background: #1f5fe0; }
   hr { border: 0; border-top: 1px solid #dfe3ea; margin: 40px 0 0; }
-  @media (prefers-color-scheme: dark) { .store { background: #fff; color: #000; } body { background: #111317; color: #eceff5; } .lead { color: #a9b2c3; } hr { border-color: #2c3442; } a { color: #6c9bff; } }
+  @media (prefers-color-scheme: dark) { .store { background: #fff; color: #000; } body { background: #111317; color: #eceff5; } .lead { color: #a9b2c3; } hr { border-color: #2c3442; } a { color: #6c9bff; } .lang { border-color: #2c3442; } }
 </style>
 </head>
 <body>
 <main>
-  <p class="nav"><a href="/">7788dev 앱</a></p>
+  <p class="nav"><a href="/" id="home">7788dev 앱</a>
+    <select class="lang" id="lang" aria-label="Language"><option value="ko" lang="ko">한국어</option><option value="en" lang="en">English</option><option value="ja" lang="ja">日本語</option><option value="zh" lang="zh-Hans">中文</option></select></p>
+<div id="content">
   <h1>Pinshot</h1>
   <p class="lead">화면의 일부를 캡쳐해 다른 앱 위에 띄워 두는 아이폰 · 아이패드 앱입니다.</p>
   <a class="store" href="https://apps.apple.com/app/id6829664152" target="_blank" rel="noopener">App Store에서 받기</a>
+  <div class="shots">
+    <img src="shots/01.jpg" width="414" height="900" alt="글 메모를 다른 앱 위에 작은 창으로 띄운 화면">
+    <img src="shots/02.jpg" width="414" height="900" loading="lazy" alt="캡쳐 미리보기 · 자르기 · 고정 버튼이 있는 메모 목록">
+    <img src="shots/03.jpg" width="414" height="900" loading="lazy" alt="이미지 속 글자를 복사하고 번역하는 화면">
+    <img src="shots/04.jpg" width="414" height="900" loading="lazy" alt="웹 페이지 전체를 길게 캡쳐한 노트">
+    <img src="shots/05.jpg" width="414" height="900" loading="lazy" alt="PC에서 받기 화면 (QR · 연결 코드)">
+  </div>
 
   <h2>앱 소개</h2>
   <p>Pinshot은 캡쳐한 이미지나 짧은 글을 화면 위에 작은 창(화면 속 화면)으로 띄워, 다른 앱을 쓰면서도 계속 볼 수 있게 해 줍니다. 띄운 창은 옮기거나 화면 가장자리로 밀어 숨길 수 있습니다. 긴 캡쳐는 노트로 모아 두고 태그로 찾을 수 있으며, 이미지 속 글자 읽기와 번역도 기기 안에서 합니다.</p>
@@ -98,6 +116,247 @@
   <h2 id="support">문의 · 지원</h2>
   <p>사용 중 문제나 궁금한 점, 개인정보 관련 요청은 <a href="mailto:7788dev@gmail.com">7788dev@gmail.com</a> 으로 보내 주세요.</p>
   <hr>
+</div>
 </main>
+
+<!-- 다른 언어 본문: 한국어(위)와 같은 내용. 고칠 때는 네 언어 모두 맞춘다. -->
+<template id="t-en">
+  <h1>Pinshot</h1>
+  <p class="lead">Capture part of your screen and keep it floating on top of other apps, on iPhone and iPad.</p>
+  <a class="store" href="https://apps.apple.com/app/id6829664152" target="_blank" rel="noopener">Download on the App Store</a>
+  <div class="shots">
+    <img src="shots/01.jpg" width="414" height="900" alt="A text note floating in a small window over another app">
+    <img src="shots/02.jpg" width="414" height="900" loading="lazy" alt="Memo list with preview, crop and pin buttons">
+    <img src="shots/03.jpg" width="414" height="900" loading="lazy" alt="Copying and translating text found in an image">
+    <img src="shots/04.jpg" width="414" height="900" loading="lazy" alt="A whole web page captured as one long note">
+    <img src="shots/05.jpg" width="414" height="900" loading="lazy" alt="Receive from PC screen with a QR code and connection code">
+  </div>
+
+  <h2>About</h2>
+  <p>Pinshot keeps a screenshot or a short note in a small window on top of your screen (Picture in Picture), so you can keep looking at it while you use other apps. Move the window around, or push it to the edge of the screen to tuck it away. Long captures are kept as Notes you can find by tag, and reading and translating text in images happens on your device.</p>
+  <h2>Features</h2>
+  <ul>
+    <li><strong>Floating notes on iPhone</strong> — Keep a text note in a small window while you use other apps.</li>
+    <li><strong>Pin screenshots on screen</strong> — Pin a screenshot in a Picture in Picture window over other apps. Move it, resize it, or push it to the edge to hide it.</li>
+    <li><strong>Just the part you need</strong> — Frame only the part of a screenshot you want to see and show it in the window.</li>
+    <li><strong>Long captures · Notes</strong> — Capture whole web pages, and keep long captures as Notes you can find by tag.</li>
+    <li><strong>Text recognition · translation</strong> — Read text in images, copy it and translate it (processed on your device).</li>
+    <li><strong>Lock</strong> — Lock items you don't want others to see with Face ID.</li>
+    <li><strong>Send to and from your PC</strong> — Send text and images between your PC and iPhone with a single QR code, no sign-in.</li>
+    <li><strong>Backup</strong> — Back up to your own Google Drive and restore from it.</li>
+  </ul>
+  <p>PC connection: open the <a href="/Pinshot/send/?lang=en">send page</a> in a browser on your PC and scan the QR code with the app. Your PC and iPhone can then exchange text and images without signing in.</p>
+
+  <h2 id="faq">FAQ</h2>
+  <h3>Can I keep a note or screenshot on top of the screen on iPhone, like on Samsung Galaxy?</h3>
+  <p>Yes. iPhone doesn't have Galaxy-style pop-up view or "Pin to screen" built in, but with Pinshot you can pin a screenshot or a text note in a Picture in Picture window over other apps. Drag the window to move it, pinch to resize it, and push it to the edge to hide it, leaving only a small handle.</p>
+  <h3>How do I pin a screenshot on top of other apps on iPhone?</h3>
+  <p>After taking a screenshot, choose Pinshot from the share menu, or tap + in Pinshot to pick a photo or paste one. Tap the pin button on that item in the list, and it floats in a small window that stays visible while you use other apps.</p>
+  <h3>Is there an app that keeps notes always on top on iPhone?</h3>
+  <p>Pinshot shows text notes in a small window too, just like images. Stick one on your screen like a sticky note and type from it into another app.</p>
+  <h3>What is it good for?</h3>
+  <p>Typing in an address, coupon number or verification code while looking at it, cooking from a recipe, keeping a map or directions in view, studying vocabulary, game guides, comparing prices while shopping, and keeping reference material handy in meetings.</p>
+  <h3>Can I show just part of a screenshot, larger?</h3>
+  <p>Yes. Frame just the part you want and show it in the window. You can also capture a whole web page as one long image and keep it as a Note.</p>
+  <h3>Does it work on iPad?</h3>
+  <p>Yes. It supports both iPhone and iPad.</p>
+  <h3>Can I send text or photos from my PC to my iPhone?</h3>
+  <p>Yes. Open the Pinshot PC page (https://7788dev-alt.github.io/Pinshot/send/) in a browser on your PC and scan the QR code. Text and images go back and forth without signing in or installing anything, and the content is encrypted in transit.</p>
+  <h3>Can I copy or translate text in a screenshot?</h3>
+  <p>Yes. Pinshot reads the text in an image (OCR) so you can copy and translate it. This happens on your device.</p>
+  <p>Also known as: floating notes, pin to screen, always on top, pop-up notes, sticky notes, pin screenshots, floating screenshot, Picture in Picture notes.</p>
+
+  <h2 id="privacy">Privacy Policy</h2>
+  <p>Effective: November 2, 2026 (previous: October 12, 2026). If this translation differs from the Korean original, the Korean original prevails.</p>
+  <ul>
+    <li><strong>The developer does not collect your information.</strong> The developer runs no sign-up and no server that stores user data, and your files, text and usage history are never sent to the developer.</li>
+    <li><strong>Your data stays on your device.</strong> Captures, memos, notes and tags are stored only on your device. Text recognition (OCR) and translation use Apple's on-device features.</li>
+    <li><strong>PC connection is optional.</strong> Only when you connect to a PC are the text and images you exchange encrypted on the device (AES-GCM) and then delivered. On the same Wi-Fi they are sent directly without a server; otherwise they pass through a Google Firebase Realtime Database relay (or ntfy.sh). Only encrypted content stays on the relay briefly, and it is deleted once received. The key exists only inside the QR code, so neither the developer nor the relay can read the content.</li>
+    <li><strong>Link capture.</strong> When you capture the web page of a link you shared, the page is loaded directly from that website, as in a normal browser.</li>
+    <li><strong>Google Drive connection is optional.</strong> Only when you connect a Google account in Settings are backup files saved to the "Pinshot" folder in your own Google Drive.</li>
+    <li><strong>Drive access is limited to files the app created.</strong> Pinshot requests access only to "files created by this app" (drive.file). It cannot read or change other files in your Drive. To show the connected account on screen, it reads the account's email address, which is stored only on your device.</li>
+    <li><strong>Sign-in information stays on your device.</strong> Google sign-in happens on Google's sign-in screen, and the app never receives your password. The token that keeps you signed in is stored in the device keychain and used only to talk to Google.</li>
+    <li><strong>You can disconnect at any time.</strong> Disconnecting in the app's Settings deletes the token on the device and asks Google to revoke access. You can also revoke it yourself on <a href="https://myaccount.google.com/permissions">your Google Account's permissions page</a>. You can delete files saved in Drive yourself.</li>
+    <li><strong>Google API Services User Data Policy.</strong> Use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements. The information is used only for the features above and is not shared with others or used for advertising.</li>
+    <li><strong>Ads (Google AdMob).</strong> Some screens in the app show Google AdMob ads. To show ads and measure their performance, Google may collect device information (device type, OS version, IP address and the approximate location derived from it), app-specific identifiers, and records of ads viewed or tapped. The app does not request App Tracking Transparency permission, so the advertising identifier (IDFA) used to track you across other companies' apps and websites is not shared. Google's use of information follows <a href="https://policies.google.com/technologies/partner-sites">How Google uses information from sites or apps that use its services</a> and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</li>
+    <li><strong>If this policy changes,</strong> we will post it on this page with the effective date.</li>
+  </ul>
+
+  <h2 id="support">Contact · Support</h2>
+  <p>For problems, questions or privacy requests, please email <a href="mailto:7788dev@gmail.com">7788dev@gmail.com</a>.</p>
+  <hr>
+</template>
+
+<template id="t-ja">
+  <h1>Pinshot</h1>
+  <p class="lead">画面の一部をキャプチャして、ほかのアプリの上に浮かべておける iPhone・iPad アプリです。</p>
+  <a class="store" href="https://apps.apple.com/app/id6829664152" target="_blank" rel="noopener">App Store でダウンロード</a>
+  <div class="shots">
+    <img src="shots/01.jpg" width="414" height="900" alt="テキストメモをほかのアプリの上に小さなウインドウで浮かべた画面">
+    <img src="shots/02.jpg" width="414" height="900" loading="lazy" alt="プレビュー・切り取り・固定ボタンのあるメモ一覧">
+    <img src="shots/03.jpg" width="414" height="900" loading="lazy" alt="画像の中の文字をコピー・翻訳する画面">
+    <img src="shots/04.jpg" width="414" height="900" loading="lazy" alt="Web ページ全体を長くキャプチャしたノート">
+    <img src="shots/05.jpg" width="414" height="900" loading="lazy" alt="PC から受け取る画面（QR・接続コード）">
+  </div>
+
+  <h2>アプリ紹介</h2>
+  <p>Pinshot は、キャプチャした画像や短いテキストを画面の上に小さなウインドウ（ピクチャ・イン・ピクチャ）で浮かべ、ほかのアプリを使いながらでも見続けられるようにします。ウインドウは動かしたり、画面の端に寄せて隠したりできます。長いキャプチャはノートにまとめてタグで探せ、画像の文字読み取りと翻訳もデバイス内で行います。</p>
+  <h2>主な機能</h2>
+  <ul>
+    <li><strong>iPhone のフローティングメモ</strong> — テキストメモを小さなウインドウで浮かべ、ほかのアプリを使いながら見られます。</li>
+    <li><strong>キャプチャを画面に固定</strong> — キャプチャした画像をピクチャ・イン・ピクチャのウインドウでほかのアプリの上に固定します。移動・サイズ変更ができ、端に寄せると隠れます。</li>
+    <li><strong>必要な部分だけ大きく</strong> — キャプチャの見たい部分だけをフレームで選んでウインドウに表示します。</li>
+    <li><strong>長いキャプチャ・ノート</strong> — Web ページを長くキャプチャし、長いキャプチャはノートにまとめてタグで探せます。</li>
+    <li><strong>文字の読み取り・翻訳</strong> — 画像の中の文字を読み取ってコピー・翻訳します（デバイス内で処理）。</li>
+    <li><strong>ロック</strong> — 見られたくない項目は Face ID でロックします。</li>
+    <li><strong>PC とやりとり</strong> — ログイン不要、QR ひとつで PC と iPhone がテキスト・画像をやりとりします。</li>
+    <li><strong>バックアップ</strong> — 自分の Google ドライブにバックアップし、復元します。</li>
+  </ul>
+  <p>PC 接続：PC のブラウザで<a href="/Pinshot/send/?lang=ja">送信ページ</a>を開き、アプリで QR を読み取ると、ログインなしで PC と iPhone がテキスト・画像をやりとりできます。</p>
+
+  <h2 id="faq">よくある質問</h2>
+  <h3>iPhone でも Galaxy のように画面の上にメモやキャプチャを浮かべておけますか？</h3>
+  <p>はい。iPhone には Galaxy のポップアップ表示や「画面に固定」のような機能は標準でありませんが、Pinshot を使えばキャプチャ画像やテキストメモをピクチャ・イン・ピクチャのウインドウでほかのアプリの上に固定できます。ウインドウはドラッグで移動、ピンチでサイズ変更でき、端に寄せると小さなつまみだけ残して隠れます。</p>
+  <h3>iPhone でスクリーンショットをほかのアプリの上に固定する方法は？</h3>
+  <p>スクリーンショットを撮ったら共有メニューで Pinshot を選ぶか、Pinshot の + ボタンから写真を選ぶ・ペーストします。一覧でその項目の固定（ピン）ボタンを押すと小さなウインドウで浮かび、ほかのアプリを使っている間も見え続けます。</p>
+  <h3>iPhone でメモを常に最前面（フローティング）に表示できるアプリはありますか？</h3>
+  <p>Pinshot はテキストメモも画像と同じように小さなウインドウで表示します。付箋のように画面に貼っておき、見ながらほかのアプリに入力できます。</p>
+  <h3>どんなときに便利ですか？</h3>
+  <p>住所・クーポン番号・認証コードを見ながら入力するとき、レシピを見ながら料理するとき、地図や道案内のキャプチャを表示しておくとき、英単語や勉強の資料、ゲームの攻略、買い物の価格比較、会議中の参考資料を見るときに使えます。</p>
+  <h3>キャプチャの一部分だけを大きく表示できますか？</h3>
+  <p>はい。フレームで見たい部分だけを選んでウインドウに表示します。Web ページ全体を 1 枚の長い画像としてキャプチャし、ノートにまとめることもできます。</p>
+  <h3>iPad でも使えますか？</h3>
+  <p>はい。iPhone と iPad の両方に対応しています。</p>
+  <h3>PC から iPhone にテキストや写真を送れますか？</h3>
+  <p>はい。PC のブラウザで Pinshot の PC 接続ページ（https://7788dev-alt.github.io/Pinshot/send/）を開いて QR を読み取ると、ログインやソフトのインストールなしでテキスト・画像をやりとりできます。内容は暗号化して送られます。</p>
+  <h3>キャプチャの中の文字をコピー・翻訳できますか？</h3>
+  <p>はい。画像の中の文字を読み取って（OCR）コピー・翻訳します。デバイス内で処理します。</p>
+  <p>こんな呼び方も：フローティングメモ、画面固定、画面の上に表示、常に最前面、ポップアップメモ、付箋メモ、スクショ固定、キャプチャを浮かべる、ピクチャ・イン・ピクチャ（PiP）メモ。</p>
+
+  <h2 id="privacy">プライバシーポリシー</h2>
+  <p>施行日：2026 年 11 月 2 日（以前：2026 年 10 月 12 日）。この翻訳と韓国語の原文が異なる場合は、韓国語の原文が優先されます。</p>
+  <ul>
+    <li><strong>開発者はユーザー情報を収集しません。</strong>開発者は会員登録やユーザーデータを保管するサーバーを運営しておらず、ユーザーのファイル・テキスト・利用履歴を開発者に送ることはありません。</li>
+    <li><strong>データはデバイスに保存されます。</strong>キャプチャ・メモ・ノート・タグはユーザーのデバイス内にのみ保存されます。文字の読み取り（OCR）と翻訳は Apple のデバイス内機能で処理します。</li>
+    <li><strong>PC 接続は任意の機能です。</strong>ユーザーが PC と接続したときだけ、やりとりするテキスト・画像がデバイスで暗号化（AES-GCM）されてから送られます。同じ Wi-Fi ならサーバーを経由せず直接送り、そうでなければ Google Firebase Realtime Database（または ntfy.sh）の中継を経由します。中継サーバーには暗号化された内容だけが一時的にとどまり、受け取った側が受け取ると削除されます。鍵は QR コードの中にしかないため、開発者や中継サーバーは内容を見ることができません。</li>
+    <li><strong>リンクのキャプチャ。</strong>ユーザーが共有したリンクの Web ページをキャプチャするとき、そのページは通常のブラウザと同じように該当の Web サイトから直接読み込まれます。</li>
+    <li><strong>Google ドライブ接続は任意の機能です。</strong>ユーザーが設定で Google アカウントを接続したときだけ、バックアップファイルがユーザー本人の Google ドライブの「Pinshot」フォルダに保存されます。</li>
+    <li><strong>ドライブへのアクセスはアプリが作成したファイルに限られます。</strong>Pinshot は「このアプリが作成したファイルのみ」にアクセスできる権限（drive.file）を要求します。ドライブのほかのファイルを読んだり変更したりはできません。接続中のアカウントを画面に表示するためにアカウントのメールアドレスを確認し、このアドレスはデバイスにのみ保存されます。</li>
+    <li><strong>ログイン情報はデバイスにのみあります。</strong>Google ログインは Google のログイン画面で行われ、アプリはパスワードを受け取りません。再ログインを不要にするトークンはデバイスのキーチェーンに保存され、Google との通信にのみ使われます。</li>
+    <li><strong>接続はいつでも解除できます。</strong>アプリの設定で接続を解除すると、デバイスのトークンが削除され、Google に権限の取り消しを要求します。<a href="https://myaccount.google.com/permissions">Google アカウントの権限ページ</a>から直接取り消すこともできます。ドライブに保存されたファイルはユーザーが直接削除できます。</li>
+    <li><strong>Google API サービスのユーザーデータに関するポリシーに従います。</strong>Google API から受け取った情報の使用は、限定使用の要件を含む <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a> に従います。受け取った情報は上記の機能にのみ使い、第三者に渡したり広告に使ったりしません。</li>
+    <li><strong>広告（Google AdMob）。</strong>アプリ内の一部の画面に Google AdMob の広告が表示されます。広告の表示と効果測定のため、Google がデバイス情報（デバイスの種類、OS のバージョン、IP アドレスとそこから推定されるおおよその位置）、アプリごとの識別子、広告を見た・タップした記録を収集することがあります。アプリはトラッキングの許可（App Tracking Transparency）を求めないため、ほかの会社のアプリや Web サイトをまたいだトラッキングに使われる広告識別子（IDFA）は渡りません。Google による情報の使用は、<a href="https://policies.google.com/technologies/partner-sites">Google のパートナーサイトに関するポリシー</a>と <a href="https://policies.google.com/privacy">Google プライバシーポリシー</a>に従います。</li>
+    <li><strong>ポリシーが変更された場合は、</strong>このページで施行日とともにお知らせします。</li>
+  </ul>
+
+  <h2 id="support">お問い合わせ・サポート</h2>
+  <p>使用中の問題や質問、個人情報に関するご依頼は <a href="mailto:7788dev@gmail.com">7788dev@gmail.com</a> までお送りください。</p>
+  <hr>
+</template>
+
+<template id="t-zh">
+  <h1>Pinshot</h1>
+  <p class="lead">截取屏幕的一部分，悬浮在其他 App 上方的 iPhone · iPad 应用。</p>
+  <a class="store" href="https://apps.apple.com/app/id6829664152" target="_blank" rel="noopener">在 App Store 下载</a>
+  <div class="shots">
+    <img src="shots/01.jpg" width="414" height="900" alt="文字便签以小窗口悬浮在其他 App 上方">
+    <img src="shots/02.jpg" width="414" height="900" loading="lazy" alt="带有预览、裁剪和固定按钮的便签列表">
+    <img src="shots/03.jpg" width="414" height="900" loading="lazy" alt="复制并翻译图片中的文字">
+    <img src="shots/04.jpg" width="414" height="900" loading="lazy" alt="将整个网页截成一张长图的笔记">
+    <img src="shots/05.jpg" width="414" height="900" loading="lazy" alt="从电脑接收界面（二维码 · 连接码）">
+  </div>
+
+  <h2>应用介绍</h2>
+  <p>Pinshot 把截图或简短文字以小窗口（画中画）悬浮在屏幕上方，让你在使用其他 App 时也能一直看到。小窗口可以移动，也可以推到屏幕边缘收起。长截图会整理成笔记，可按标签查找；图片中文字的识别和翻译也都在设备上完成。</p>
+  <h2>主要功能</h2>
+  <ul>
+    <li><strong>iPhone 悬浮便签</strong> — 文字便签以小窗口悬浮，使用其他 App 时也能看到。</li>
+    <li><strong>截图固定在屏幕上</strong> — 把截图以画中画窗口固定在其他 App 上方。可移动、调整大小，推到边缘即可隐藏。</li>
+    <li><strong>只放大需要的部分</strong> — 用框选出截图中想看的部分，显示在窗口中。</li>
+    <li><strong>长截图 · 笔记</strong> — 截取整个网页，长截图整理成笔记并按标签查找。</li>
+    <li><strong>文字识别 · 翻译</strong> — 识别图片中的文字，复制并翻译（在设备上处理）。</li>
+    <li><strong>锁定</strong> — 不想被看到的项目用面容 ID 锁定。</li>
+    <li><strong>与电脑互传</strong> — 无需登录，扫一个二维码，电脑和 iPhone 即可互传文字和图片。</li>
+    <li><strong>备份</strong> — 备份到自己的 Google 云端硬盘，并可恢复。</li>
+  </ul>
+  <p>电脑连接：在电脑浏览器中打开<a href="/Pinshot/send/?lang=zh">发送页面</a>，用 App 扫描二维码，无需登录即可在电脑和 iPhone 之间互传文字和图片。</p>
+
+  <h2 id="faq">常见问题</h2>
+  <h3>iPhone 也能像三星 Galaxy 一样把便签或截图悬浮在屏幕上吗？</h3>
+  <p>可以。iPhone 没有内置 Galaxy 那样的弹出视图或“固定到屏幕”功能，但使用 Pinshot，就能把截图或文字便签以画中画窗口固定在其他 App 上方。拖动可移动窗口，双指捏合可调整大小，推到边缘时只留下一个小把手并隐藏。</p>
+  <h3>如何在 iPhone 上把截图固定在其他 App 上方？</h3>
+  <p>截图后在分享菜单中选择 Pinshot，或在 Pinshot 中点按 + 选择照片或粘贴。在列表中点按该项目的固定（图钉）按钮，它就会以小窗口悬浮，使用其他 App 时也一直可见。</p>
+  <h3>有没有能让便签在 iPhone 上始终置顶（悬浮）的 App？</h3>
+  <p>Pinshot 也能像图片一样把文字便签显示在小窗口中。像便利贴一样贴在屏幕上，边看边在其他 App 中输入。</p>
+  <h3>适合用在哪里？</h3>
+  <p>边看边输入地址、优惠券号码、验证码时，看着菜谱做饭时，显示地图或路线截图时，背英语单词或看学习资料时，查看游戏攻略、购物比价、开会时参考资料时都很方便。</p>
+  <h3>能只放大显示截图的一部分吗？</h3>
+  <p>可以。用框选出想看的部分，显示在窗口中。也可以把整个网页截成一张长图，整理成笔记。</p>
+  <h3>iPad 上能用吗？</h3>
+  <p>能。同时支持 iPhone 和 iPad。</p>
+  <h3>能从电脑向 iPhone 发送文字或照片吗？</h3>
+  <p>能。在电脑浏览器中打开 Pinshot 电脑连接页面（https://7788dev-alt.github.io/Pinshot/send/）并扫描二维码，无需登录或安装软件即可互传文字和图片。内容加密传输。</p>
+  <h3>能复制或翻译截图中的文字吗？</h3>
+  <p>能。识别图片中的文字（OCR）后可复制、翻译，在设备上处理。</p>
+  <p>也称为：悬浮便签、屏幕固定、悬浮在屏幕上、始终置顶、弹出便签、便利贴、截图固定、悬浮截图、画中画（PiP）便签。</p>
+
+  <h2 id="privacy">隐私政策</h2>
+  <p>生效日期：2026 年 11 月 2 日（此前：2026 年 10 月 12 日）。本译文与韩文原文不一致时，以韩文原文为准。</p>
+  <ul>
+    <li><strong>开发者不收集用户信息。</strong>开发者不运营会员注册或保存用户数据的服务器，也不会把用户的文件、文字或使用记录发送给开发者。</li>
+    <li><strong>数据保存在设备上。</strong>截图、便签、笔记和标签只保存在用户的设备中。文字识别（OCR）和翻译使用 Apple 的设备端功能处理。</li>
+    <li><strong>电脑连接是可选功能。</strong>只有在用户连接电脑时，互传的文字和图片才会先在设备上加密（AES-GCM）再传送。在同一 Wi-Fi 下不经服务器直接发送，否则经由 Google Firebase 实时数据库（或 ntfy.sh）中转。中转服务器上只短暂停留加密后的内容，接收方收到后即删除。密钥只存在于二维码中，开发者和中转服务器都无法查看内容。</li>
+    <li><strong>链接截图。</strong>截取用户分享的链接网页时，该网页会像普通浏览器一样直接从对应网站加载。</li>
+    <li><strong>Google 云端硬盘连接是可选功能。</strong>只有在用户于设置中连接 Google 账号时，备份文件才会保存到用户本人 Google 云端硬盘的“Pinshot”文件夹中。</li>
+    <li><strong>云端硬盘的访问范围仅限于本 App 创建的文件。</strong>Pinshot 只请求访问“本 App 创建的文件”的权限（drive.file），无法读取或更改云端硬盘中的其他文件。为在界面上显示已连接的账号，会读取该账号的电子邮件地址，此地址只保存在设备上。</li>
+    <li><strong>登录信息只保存在设备上。</strong>Google 登录在 Google 的登录界面中进行，App 不会接收密码。免于重新登录的令牌保存在设备的钥匙串中，仅在与 Google 通信时使用。</li>
+    <li><strong>可随时断开连接。</strong>在 App 的设置中断开连接后，设备上的令牌会被删除，并向 Google 请求撤销权限。也可以在 <a href="https://myaccount.google.com/permissions">Google 账号的权限页面</a>中自行撤销。保存在云端硬盘中的文件可由用户自行删除。</li>
+    <li><strong>遵守 Google API 服务用户数据政策。</strong>对从 Google API 获得的信息的使用遵守包括“有限使用”要求在内的 <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>。获得的信息仅用于上述功能，不会提供给他人或用于广告。</li>
+    <li><strong>广告（Google AdMob）。</strong>App 内部分界面会显示 Google AdMob 广告。为展示广告和衡量效果，Google 可能会收集设备信息（设备类型、系统版本、IP 地址及据此推算的大致位置）、App 专用标识符，以及浏览或点按广告的记录。App 不请求跟踪许可（App Tracking Transparency），因此不会提供用于跨其他公司的 App 和网站进行跟踪的广告标识符（IDFA）。Google 对信息的使用遵循 <a href="https://policies.google.com/technologies/partner-sites">Google 合作伙伴网站政策</a>和 <a href="https://policies.google.com/privacy">Google 隐私权政策</a>。</li>
+    <li><strong>政策如有变更，</strong>将在本页面连同生效日期一并公告。</li>
+  </ul>
+
+  <h2 id="support">联系 · 支持</h2>
+  <p>使用中遇到问题、有疑问或有个人信息相关请求，请发送邮件至 <a href="mailto:7788dev@gmail.com">7788dev@gmail.com</a>。</p>
+  <hr>
+</template>
+
+<script>
+(function () {
+  // 언어: 주소 ?lang= → 전에 고른 것(PC 페이지와 같은 저장 키) → 브라우저 언어 → 영어. 중국어는 간체 하나.
+  var META = {
+    ko: { home: '7788dev 앱', title: document.title, desc: document.querySelector('meta[name="description"]').content },
+    en: { home: '7788dev apps', title: 'Pinshot — Floating notes · Pin screenshots on top of any app (iPhone)', desc: 'Pin screenshots and notes in a small floating window (Picture in Picture) on top of other apps on iPhone and iPad, like Samsung Galaxy’s pin to screen and pop-up notes. Floating notes, text recognition and translation, send to and from your PC.' },
+    ja: { home: '7788dev のアプリ', title: 'Pinshot — iPhone フローティングメモ・キャプチャを画面に固定', desc: 'Galaxy の画面固定・ポップアップメモのように、iPhone・iPad でキャプチャやメモを小さなウインドウ（ピクチャ・イン・ピクチャ）でほかのアプリの上に固定できるアプリ Pinshot。フローティングメモ、文字の読み取り・翻訳、PC とのやりとり。' },
+    zh: { home: '7788dev 的应用', title: 'Pinshot — iPhone 悬浮便签 · 截图固定在屏幕上', desc: '像三星 Galaxy 的屏幕固定和弹出便签一样，在 iPhone · iPad 上把截图和便签以小窗口（画中画）固定在其他 App 上方的应用 Pinshot。悬浮便签、文字识别 · 翻译、与电脑互传。' }
+  };
+  var STORE = 'pinshotLang';
+  function pick() {
+    try { var q = new URLSearchParams(location.search).get('lang'); if (q && META[q.slice(0, 2)]) return q.slice(0, 2); } catch (e) {}
+    try { var s = localStorage.getItem(STORE); if (s && META[s]) return s; } catch (e) {}
+    var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < list.length; i++) { var c = String(list[i]).slice(0, 2).toLowerCase(); if (META[c]) return c; }
+    return 'en';
+  }
+  var content = document.getElementById('content'), koHTML = content.innerHTML, sel = document.getElementById('lang');
+  function apply(lang) {
+    var m = META[lang], tpl = document.getElementById('t-' + lang);
+    content.innerHTML = tpl ? tpl.innerHTML : koHTML;
+    document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : lang;
+    document.getElementById('home').textContent = m.home;
+    document.title = m.title;
+    document.querySelector('meta[name="description"]').setAttribute('content', m.desc);
+    sel.value = lang;
+  }
+  var lang = pick();
+  if (lang !== 'ko') apply(lang);
+  else sel.value = 'ko';
+  if (location.hash) { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+  sel.addEventListener('change', function () {
+    try { localStorage.setItem(STORE, sel.value); } catch (e) {}
+    apply(sel.value);
+  });
+})();
+</script>
 </body>
 </html>
